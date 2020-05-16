@@ -1,0 +1,12 @@
+@import "../styles/base.scss";
+@import "~spectre.css/src/_variables.scss";
+
+.panel {
+    background-color: $light-color;
+    border: none;
+    @extend %shadow;
+}
+
+.panel .panel-body {
+    overflow-y: visible;
+}

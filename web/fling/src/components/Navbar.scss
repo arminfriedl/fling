@@ -1,0 +1,46 @@
+$primary-color: rgb(235, 236, 237);
+
+@import "../styles/base.scss";
+@import "~spectre.css/src/_mixins.scss";
+@import "~spectre.css/src/_variables.scss";
+@import "~spectre.css/src/_buttons.scss";
+
+.navbar {
+    @extend %shadow;
+    padding: 0.2rem;
+    background-color: #323334;
+    color: #ebeced;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: $primary-color;
+}
+
+.navbar input {
+    background-color: #464748;
+    border: none;
+}
+
+.navbar input + button.input-group-btn {
+    background-color: #464748;
+    border: none;
+    border-left: solid;
+    border-left-color: #323334;
+    border-left-width: thin;
+}
+
+.navbar-brand img {
+    height: 1.1rem;
+    margin-right: 0.3rem;
+    margin-left: 0.2rem;
+}
+
+.navbar-control {
+    .btn, a {
+        font-size: 0.7rem;
+    }
+}

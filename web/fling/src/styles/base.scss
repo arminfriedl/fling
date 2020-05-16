@@ -1,0 +1,15 @@
+@import "~normalize.css/normalize.css";
+
+@import "~spectre.css/dist/spectre.min.css";
+@import "~spectre.css/dist/spectre-icons.css";
+
+@import "partials/_shadows.scss";
+@import "variables/_breakpoints.scss";
+@import "variables/_colors.scss";
+
+@import "form.scss";
+@import "container.scss";
+
+body {
+    background-color: #ebeced;
+}

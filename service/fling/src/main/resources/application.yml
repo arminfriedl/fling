@@ -1,0 +1,1 @@
+spring.profiles.active: "@spring.profiles.active@" # To be replaced by maven according to profile settings
