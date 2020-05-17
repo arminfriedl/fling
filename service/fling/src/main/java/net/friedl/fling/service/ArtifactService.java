@@ -56,7 +56,7 @@ public class ArtifactService {
     }
 
     public Optional<ArtifactDto> findArtifact(Long artifactId) {
-        return null;
+        return artifactMapper.map(artifactRepository.findById(artifactId));
     }
 
     public ArtifactDto mergeArtifact(Long artifactId, String body) {
@@ -73,5 +73,20 @@ public class ArtifactService {
                 .ifPresent(artifactRepository::save);
 
         return artifactMapper.map(artifactRepository.getOne(artifactId));
+    }
+
+    public void deleteArtifact(Long artifactId) throws ArchiveException {
+        var doi = artifactRepository.getOne(artifactId).getDoi();
+        artifactRepository.deleteById(artifactId);
+        archive.remove(doi);
+    }
+
+    public String generateDownloadId(Long artifactId) {
+        // TODO: This id is not secured! Generate temporary download id
+        return artifactRepository.getOne(artifactId).getDoi();
+    }
+
+    public InputStream downloadArtifact(String downloadId) throws ArchiveException {
+        return archive.get(downloadId);
     }
 }

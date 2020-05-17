@@ -1,16 +1,38 @@
 import log from 'loglevel';
 import React, {useState, useEffect, useRef} from 'react';
+import {useHistory, useLocation} from 'react-router-dom';
 
 import classNames from 'classnames';
 
 import {artifactClient} from '../../util/flingclient';
 
 function FlingArtifactControl(props) {
+    let history = useHistory();
+    let iframeContainer = useRef(null);
+
+    function handleDelete(ev) {
+        artifactClient.deleteArtifact(props.artifact.id)
+            .then(() => props.reloadArtifactsFn());
+    }
+
+    function handleDownload(ev) {
+        artifactClient.downloadArtifact(props.artifact.id)
+            .then(url => {
+                // We need this iframe hack because with a regular href, while
+                // the browser downloads the file fine, it also reloads the page, hence
+                // loosing all logs and state
+                let frame = document.createElement("iframe");
+                frame.src = url;
+                iframeContainer.current.appendChild(frame);
+            });
+    }
+
     return(
         <div className={`btn-group ${props.hidden ? "d-invisible": "d-visible"}`}>
-          <button className="btn btn-sm"><i className="icon icon-delete"/></button>
+          <button className="btn btn-sm" onClick={handleDelete}><i className="icon icon-delete"/></button>
           <button className="btn btn-sm"><i className="icon icon-edit"/></button>
-          <button className="btn btn-sm"><i className="icon icon-download"/></button>
+          <button className="btn btn-sm" onClick={handleDownload}><i className="icon icon-download"/></button>
+          <div className="d-hide" ref={iframeContainer}/>
         </div>
     );
 }
@@ -23,7 +45,7 @@ function FlingArtifactRow(props) {
           <td>{props.artifact.name}</td>
           <td>{props.artifact.version}</td>
           <td/>
-          <td><FlingArtifactControl hidden={!hovered} /></td>
+          <td><FlingArtifactControl artifact={props.artifact} reloadArtifactsFn={props.reloadArtifactsFn} hidden={!hovered} /></td>
         </tr>
     );
 }
@@ -61,7 +83,7 @@ export default function FlingArtifacts(props) {
             .then(result => {
                 log.debug(`Got ${result.length} artifacts`);
                 for(let artifact of result) {
-                    artifacts.push(<FlingArtifactRow key={artifact.id} artifact={artifact} />);
+                    artifacts.push(<FlingArtifactRow key={artifact.id} artifact={artifact} reloadArtifactsFn={getArtifacts} />);
                 }
 
                 setArtifacts(artifacts);

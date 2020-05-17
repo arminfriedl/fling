@@ -90,6 +90,12 @@ body {
 \*************/
 .panel {
     background-color: #ffffff;
+    border: none;
+    @include shadow;
+
+    .panel-body {
+        overflow-y: visible;
+    }
 }
 
 /*************\

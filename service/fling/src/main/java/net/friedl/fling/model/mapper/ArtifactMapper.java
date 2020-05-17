@@ -3,6 +3,7 @@ package net.friedl.fling.model.mapper;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.mapstruct.Mapper;
 
@@ -18,6 +19,10 @@ public abstract class ArtifactMapper {
     public abstract ArtifactEntity map(ArtifactDto artifactDto);
 
     public abstract List<ArtifactDto> map(List<ArtifactEntity> artifactEntities);
+
+    public Optional<ArtifactDto> map(Optional<ArtifactEntity> artifactEntity) {
+        return artifactEntity.map(a -> map(a));
+    }
 
     public ArtifactDto merge(ArtifactDto originalArtifactDto, Map<String, Object> patch) {
         ArtifactDto mergedArtifactDto = new ArtifactDto();

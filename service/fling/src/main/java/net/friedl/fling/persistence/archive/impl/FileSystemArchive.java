@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
@@ -34,8 +35,7 @@ public class FileSystemArchive implements Archive {
             var path = Paths.get(configuration.getDirectory(), id);
             FileInputStream fis = new FileInputStream(path.toFile());
             return fis;
-        }
-        catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             throw new ArchiveException(ex);
         }
     }
@@ -56,9 +56,18 @@ public class FileSystemArchive implements Archive {
             fc.close();
             return fileStoreId;
 
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new ArchiveException(ex);
+        }
+    }
+
+    @Override
+    public void remove(String id) throws ArchiveException {
+        var path = Paths.get(configuration.getDirectory(), id);
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new ArchiveException("Could not delete file at " + path.toString(), e);
         }
     }
 

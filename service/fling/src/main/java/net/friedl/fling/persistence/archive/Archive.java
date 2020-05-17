@@ -8,7 +8,7 @@ import java.io.InputStream;
 public interface Archive {
     /**
      * Retrieve an artifact from the archive
-     * 
+     *
      * @param id The unique artifact id as returned by {@link Archive#store}
      * @return An {@link InputStream} for reading the artifact
      */
@@ -16,7 +16,7 @@ public interface Archive {
 
     /**
      * Store an artifact
-     * 
+     *
      * @param is The artifact represented as {@link InputStream}
      * @return A unique archive id for the artifact
      * @throws IOException If anything goes wrong while storing the artifact in
@@ -32,4 +32,11 @@ public interface Archive {
             throw new ArchiveException(ex);
         }
     }
+
+    /**
+     * Delete an artifact
+     *
+     * @param id The unique artifact id as returned by {@link Archive#store}
+     */
+    void remove(String id) throws ArchiveException;
 }
