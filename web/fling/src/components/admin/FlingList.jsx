@@ -1,7 +1,7 @@
 import log from 'loglevel';
 import React, {useState, useEffect} from 'react';
 
-import {flingClient} from '../util/flingclient';
+import {flingClient} from '../../util/flingclient';
 
 import FlingTile from './FlingTile';
 

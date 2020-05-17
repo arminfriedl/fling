@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 
 import classNames from 'classnames';
 
-import {artifactClient} from '../util/flingclient';
+import {artifactClient} from '../../util/flingclient';
 
 function FlingArtifactControl(props) {
     return(

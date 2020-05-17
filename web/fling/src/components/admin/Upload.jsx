@@ -1,12 +1,13 @@
 import log from 'loglevel';
 import React, {useState, useEffect, useRef} from 'react';
+import {Switch, Route, Redirect, BrowserRouter, useLocation, useParams, Link} from "react-router-dom";
 
 import classNames from 'classnames';
 
-import {artifactClient} from '../util/flingclient';
+import {artifactClient} from '../../util/flingclient';
 
-import upload from './upload.svg';
-import drop from './drop.svg';
+import upload from '../resources/upload.svg';
+import drop from '../resources/drop.svg';
 
 
 export default function Upload(props) {

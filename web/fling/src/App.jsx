@@ -5,14 +5,14 @@ import {Switch, Route, Redirect} from "react-router-dom";
 
 import request, {isOwner} from './util/request';
 
-import Login from './components/Login';
-import Fling from './components/Fling';
+import Login from './components/admin/Login';
+import Fling from './components/admin/Fling';
 
 export default () => {
     return (
         <Switch>
-          <Route exact path="/login" component={Login} />
-          <OwnerRoute exact path="(/|/flings)"><Fling /></OwnerRoute>
+          <Route exact path="/admin/login" component={Login} />
+          <OwnerRoute path="/admin"><Fling /></OwnerRoute>
           <Route match="*">Not implemented</Route>
         </Switch>
     );
@@ -27,7 +27,7 @@ function OwnerRoute({ children, ...rest }) {
           render={({ location }) => {
               log.info(request.defaults);
               if(isOwner()) { return children; }
-              else { return <Redirect to={{pathname: "/login", state: {from: location}}} />; }
+              else { return <Redirect to={{pathname: "/admin/login", state: {from: location}}} />; }
           }}
         />
     );

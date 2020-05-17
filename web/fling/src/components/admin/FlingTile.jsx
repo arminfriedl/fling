@@ -2,7 +2,7 @@ import log from 'loglevel';
 import React, {useRef, useState} from 'react';
 import classNames from 'classnames';
 
-import {flingClient} from '../util/flingclient';
+import {flingClient} from '../../util/flingclient';
 
 function TileAction(props) {
     let shareUrlRef = useRef(null);

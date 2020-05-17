@@ -2,7 +2,7 @@ import log from 'loglevel';
 import React, {useState, useEffect} from 'react';
 import {useHistory, useLocation} from 'react-router-dom';
 
-import request, {setAuth} from '../util/request';
+import request, {setAuth} from '../../util/request';
 
 import Error from './Error';
 
@@ -12,7 +12,7 @@ export default () => {
     const [password, setPassword] = useState("");
     const history = useHistory();
     const location = useLocation();
-    const { from } = location.state || { from: { pathname: "/" } };
+    const { from } = location.state || { from: { pathname: "/admin" } };
 
     useEffect(() => setAuth(null), []);
 

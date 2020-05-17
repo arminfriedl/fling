@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 
 import classNames from 'classnames';
 
-import {flingClient} from '../util/flingclient';
+import {flingClient} from '../../util/flingclient';
 
 export default function Settings(props) {
     let [fling, setFling] = useState({name: "", sharing: {directDownload: false, allowUpload: true, shared: true, shareUrl: ""}});

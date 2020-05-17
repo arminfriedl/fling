@@ -1,9 +1,9 @@
 import log from 'loglevel';
 import React from 'react';
 
-import request from '../util/request';
+import request from '../../util/request';
 
-import send from './send.svg';
+import send from '../resources/send.svg';
 
 export default function Navbar() {
     return (
@@ -22,7 +22,7 @@ export default function Navbar() {
           </section>
           <section className="navbar-section navbar-control">
             <button className="btn btn-sm btn-link"><i className="icon icon-plus"/> New</button>
-            <a className="btn btn-sm btn-link" href="/login"><i className="icon icon-shutdown"/> Logout</a>
+            <a className="btn btn-sm btn-link" href="/admin/login"><i className="icon icon-shutdown"/> Logout</a>
           </section>
         </header>
     );
