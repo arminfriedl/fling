@@ -1,6 +1,7 @@
 import log from 'loglevel';
 import React, {useRef, useState} from 'react';
 import classNames from 'classnames';
+import {Switch, Route, Redirect, BrowserRouter, useLocation, useParams, NavLink} from "react-router-dom";
 
 import {flingClient} from '../../util/flingclient';
 
@@ -70,17 +71,14 @@ export default function FlingTile(props) {
     return (
         <div>
           <div className={tileClasses}>
-            <div className="tile-content" onClick={() => activateTile(props.fling.id)}>
-              <div className="tile-title">{props.fling.name}</div>
-              <small className="tile-subtitle text-gray">14MB · Public · 1 Jan, 2017</small>
+            <div className="tile-content">
+              <NavLink to={`/admin/${props.fling.id}`}>
+                <div className="tile-title">{props.fling.name}</div>
+                <small className="tile-subtitle text-gray">14MB · Public · 1 Jan, 2017</small>
+              </NavLink>
             </div>
             <TileAction fling={props.fling} refreshFlingListFn={props.refreshFlingListFn} />
           </div>
         </div>
     );
-
-    function activateTile() {
-        log.debug(`Activating fling ${props.fling.id}`);
-        props.setActiveFlingFn(props.fling.id);
-    }
 }

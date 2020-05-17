@@ -12,7 +12,6 @@ import Settings from './Settings';
 
 export default function FlingContent(props) {
     let location = useLocation();
-    let { fling } = useParams();
 
     function path(tail) {
         return `/admin/${props.activeFling}/${tail}`;
@@ -20,6 +19,8 @@ export default function FlingContent(props) {
 
     return(
         <div className="fling-content p-2">
+          {log.info("FlingContent location ", location)}
+          {log.info("FlingContent active fling ", props.activeFling)}
           <ul className="tab tab-block mt-0">
             <li className={`tab-item ${location.pathname !== path("upload") && location.pathname !== path("settings") ? "active": ""}`}>
               <Link to={path("files")}>Files</Link>
@@ -34,9 +35,10 @@ export default function FlingContent(props) {
 
           <div className="mt-2">
             <Switch>
-              <Route exact path={["/admin/:fling/files","/admin"]}><FlingArtifacts activeFling={props.activeFling} /></Route>
+              <Route exact path="/admin/:fling"><FlingArtifacts activeFling={props.activeFling} /></Route>
+              <Route path="/admin/:fling/files"><FlingArtifacts activeFling={props.activeFling} /></Route>
               <Route path="/admin/:fling/upload"><Upload activeFling={props.activeFling} /></Route>
-              <Route path="/admin/:fling/settings"><Settings activeFling={props.activeFling}/></Route>
+              <Route path="/admin/:fling/settings"><Settings activeFling={props.activeFling} /></Route>
             </Switch>
           </div>
         </div>

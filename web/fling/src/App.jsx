@@ -12,7 +12,8 @@ export default () => {
     return (
         <Switch>
           <Route exact path="/admin/login" component={Login} />
-          <OwnerRoute path="/admin"><Fling /></OwnerRoute>
+          <OwnerRoute exact path="/admin"><Fling /></OwnerRoute>
+          <OwnerRoute path="/admin/:fling"><Fling /></OwnerRoute>
           <Route match="*">Not implemented</Route>
         </Switch>
     );

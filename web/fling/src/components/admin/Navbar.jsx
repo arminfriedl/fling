@@ -9,7 +9,7 @@ export default function Navbar() {
     return (
         <header className="navbar">
           <section className="navbar-section">
-            <a href="/" className="navbar-brand">
+            <a href="/admin" className="navbar-brand">
               <img src={send} alt="Fling logo"/>
               Fling
             </a>

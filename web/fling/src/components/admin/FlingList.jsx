@@ -7,10 +7,11 @@ import FlingTile from './FlingTile';
 
 export default function FlingList(props) {
     const [flings, setFlings] = useState([]);
-    useEffect(() => { refreshFlingList(); }, [props.activeFling]);
+    useEffect(() => { refreshFlingList(); }, []);
 
     return(
         <div className="panel">
+          {log.info(`Got active fling: ${props.activeFling}`)}
           <div className="panel-header p-2">
             <h5>My Flings</h5>
           </div>
@@ -27,8 +28,6 @@ export default function FlingList(props) {
         for (let fling of flings) {
             let flingTile = <FlingTile fling={fling}
                                        key={fling.id}
-                                       activeFling={props.activeFling}
-                                       setActiveFlingFn={props.setActiveFlingFn}
                                        refreshFlingListFn={refreshFlingList} />;
             newFlings.push(flingTile);
         }
