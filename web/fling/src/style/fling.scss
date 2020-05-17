@@ -1,0 +1,217 @@
+@import "variables";
+@import "mixins";
+@import "utils";
+
+@import "~spectre.css/src/spectre.scss";
+@import "~spectre.css/src/spectre-icons.scss";
+@import "~spectre.css/src/spectre-exp.scss";
+
+
+body {
+    background-color: $canvas-base-color;
+}
+
+/*********\
+|  Login  |
+\*********/
+
+// Basic styling for the login form
+.login-form {
+    @include shadow;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    background-color: #ffffff;
+}
+
+// Row of actions - submit, remember me
+.login-action-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+// Little grey text at the bottom of the login box
+.login-footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: $light-grey;
+    margin-top: 0.25rem;
+}
+
+/*********\
+|  Navbar |
+\*********/
+
+.navbar {
+    @include shadow;
+    padding: 0.4rem;
+    background-color: $navbar-base-color;
+    color: $navbar-color;
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: $navbar-color;
+
+        img {
+            height: 1.1rem;
+            margin-right: 0.3rem;
+            margin-left: 0.2rem;
+        }
+    }
+
+    input {
+        background-color: $dark-grey;
+        border: none;
+    }
+
+    .btn.btn-link {
+        color: $navbar-color;
+    }
+
+    input + button.input-group-btn {
+        background-color: $dark-grey;
+        border: none;
+        border-left: solid;
+        border-left-color: $navbar-base-color;
+        border-left-width: thin;
+    }
+}
+
+.navbar-control {
+    .btn, a {
+        font-size: 0.7rem;
+    }
+}
+
+/*************\
+|  FlingList  |
+\*************/
+.panel {
+    background-color: #ffffff;
+}
+
+/*************\
+|  FlingTile  |
+\*************/
+
+.divider {
+    transform: scale(0.8, 1) translate(-10%,0);
+}
+
+.tile{
+    &.active {
+        background-color: $gray-color-light;
+    }
+    &:hover {
+        background-color: $secondary-color;
+    }
+}
+
+.input-group-addon.input-group-addon-sm {
+    padding-top: 0.05rem;
+    padding-bottom: 0.05rem;
+}
+
+.form-input.input-share-id {
+    cursor: text;
+    box-shadow: none;
+}
+
+/****************\
+|  FlingContent  |
+\****************/
+
+.fling-content {
+    @include shadow;
+    background-color: #ffffff;
+}
+
+/******************\
+|  FlingArtifacts  |
+\******************/
+
+.table {
+    table-layout: fixed;
+}
+
+thead th {
+    &:nth-child(1) {
+        width:60%;
+    }
+    &:nth-child(2) {
+        width:20%;
+    }
+    &:nth-child(3) {
+        width:20%;
+    }
+    // control box
+    &:nth-child(4) {
+        text-align: right;
+        width: 4*$control-size;
+    }
+}
+
+tbody td {
+    &:nth-child(4) {
+        text-align: right;
+        width: 4*$control-size;
+    }
+}
+
+.artifact-row:hover {
+    background-color: $secondary-color;
+}
+
+/**********\
+|  Upload  |
+\**********/
+
+.dropzone {
+    @include shadow;
+    position: relative;
+    text-align: center;
+}
+
+.dropzone-icon {
+    height: 64px;
+    width: 64px;
+}
+
+.dropzone-icon-upload {
+    @extend .dropzone-icon;
+    opacity: 0.3;
+}
+
+.file-list {
+    @include shadow;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.file-list .row {
+    @extend .container;
+    @extend .my-2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.total-upload {
+    float: left;
+    align-self: flex-start;
+}
+
+.btn-upload {
+    align-self: flex-end;
+}
+
+.my-input {
+    inset: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}

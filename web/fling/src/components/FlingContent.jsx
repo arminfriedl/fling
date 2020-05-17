@@ -10,8 +10,6 @@ import FlingArtifacts from './FlingArtifacts';
 import Upload from './Upload';
 import Settings from './Settings';
 
-import './FlingContent.scss';
-
 export default function FlingContent(props) {
     let location = useLocation();
 

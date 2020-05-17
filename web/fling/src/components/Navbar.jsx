@@ -3,7 +3,6 @@ import React from 'react';
 
 import request from '../util/request';
 
-import './Navbar.scss';
 import send from './send.svg';
 
 export default function Navbar() {

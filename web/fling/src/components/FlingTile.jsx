@@ -4,8 +4,6 @@ import classNames from 'classnames';
 
 import {flingClient} from '../util/flingclient';
 
-import './FlingTile.scss';
-
 function TileAction(props) {
     let shareUrlRef = useRef(null);
 

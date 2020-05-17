@@ -5,8 +5,6 @@ import classNames from 'classnames';
 
 import {flingClient} from '../util/flingclient';
 
-import './Settings.scss';
-
 export default function Settings(props) {
     let [fling, setFling] = useState({name: "", sharing: {directDownload: false, allowUpload: true, shared: true, shareUrl: ""}});
     let [shareUrlUnique, setShareUrlUnique] = useState(true);

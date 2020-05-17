@@ -7,8 +7,6 @@ import FlingContent from './FlingContent';
 
 import {HashRouter} from 'react-router-dom';
 
-import './Fling.scss';
-
 export default function Fling() {
     const [activeFling, setActiveFling] = useState(undefined);
 

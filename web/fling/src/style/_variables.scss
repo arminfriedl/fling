@@ -1,0 +1,37 @@
+/**********\
+|  Colors  |
+\**********/
+// Primary colors
+$blue-grey: #718096;
+$grey: #cbd5e0;
+$light-grey: #ebeced;
+$dark-grey: #464748;
+$red: #e53e3e;
+$black: #323334;
+
+// Semantic colors
+$primary-color: #4693d2;
+$canvas-base-color: $grey;
+$navbar-base-color: $black;
+$navbar-color: $light-grey;
+
+/*********\
+|  Fonts  |
+\*********/
+
+// Sizes
+$font-size-base:              1rem; // Assumes the browser default, typically `16px`
+$font-size-lg:                $font-size-base * 1.25;
+$font-size-sm:                $font-size-base * .875;
+$font-size-xs:                $font-size-base * .75;
+
+
+
+/**************\
+|  Breakpoints |
+\**************/
+
+$sm: '640px';
+$md: '768px';
+$lg: '1024px';
+$xl: '1280px';

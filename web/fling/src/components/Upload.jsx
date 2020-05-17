@@ -7,7 +7,6 @@ import {artifactClient} from '../util/flingclient';
 
 import upload from './upload.svg';
 import drop from './drop.svg';
-import './Upload.scss';
 
 
 export default function Upload(props) {

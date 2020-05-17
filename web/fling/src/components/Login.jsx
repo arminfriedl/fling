@@ -4,8 +4,6 @@ import {useHistory, useLocation} from 'react-router-dom';
 
 import request, {setAuth} from '../util/request';
 
-import './Login.scss';
-
 import Error from './Error';
 
 export default () => {
@@ -22,7 +20,7 @@ export default () => {
         <div className="container-center">
           <div>
             <Error errors={errors} clearErrors={clearErrors} >
-              <form className="container-login" onSubmit={handleSubmit}>
+              <form className="login-form" onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label className="form-label" htmlFor="username">Username</label>
                   <input className="form-input" id="username" name="username" type="text" placeholder="Username"
@@ -33,7 +31,7 @@ export default () => {
                   <input className="form-input" id="password" name="password" type="password" placeholder={"*".repeat(18)}
                          value={password} onChange={handleChange} />
                 </div>
-               <div className="form-action-row">
+               <div className="login-action-row">
                  <div className="form-group">
                    <label className="form-switch input-sm">
                      <input type="checkbox" />
@@ -45,7 +43,7 @@ export default () => {
               </form>
             </Error>
 
-            <p className="bottom-text">Ready. Set. Fling.</p>
+            <p className="login-footer">Ready. Set. Fling.</p>
           </div>
 
         </div>

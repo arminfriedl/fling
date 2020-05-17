@@ -5,8 +5,6 @@ import classNames from 'classnames';
 
 import {artifactClient} from '../util/flingclient';
 
-import './FlingArtifacts.scss';
-
 function FlingArtifactControl(props) {
     return(
         <div className={`btn-group ${props.hidden ? "d-invisible": "d-visible"}`}>

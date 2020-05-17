@@ -5,8 +5,6 @@ import {flingClient} from '../util/flingclient';
 
 import FlingTile from './FlingTile';
 
-import './FlingList.scss';
-
 export default function FlingList(props) {
     const [flings, setFlings] = useState([]);
     useEffect(() => { refreshFlingList(); }, [props.activeFling]);

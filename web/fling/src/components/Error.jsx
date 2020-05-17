@@ -1,8 +1,6 @@
 import React, {useState} from 'react';
 import classNames from 'classnames';
 
-import './Error.scss';
-
 import log from 'loglevel';
 
 export default (props) => {
