@@ -169,10 +169,9 @@ export default function Upload(props) {
                  onDragEnter={handleOnDragEnter}
                  onDragLeave={handleOnDragLeave}>
 
-              <div className="dropzone c-hand py-2">
+              <div className="dropzone c-hand py-2" onDragLeave={stopEvent} >
                 <input className="d-hide" ref={fileInputRef} type="file" multiple
-                       onDragOver={stopEvent} onDragEnter={stopEvent} onDragLeave={stopEvent}
-                       onChange={handleFileInputChange} />
+                       onDragLeave={stopEvent} onChange={handleFileInputChange} />
                 {zoneContent(dragging)}
               </div>
             </div>
@@ -186,7 +185,7 @@ export default function Upload(props) {
                     </div>
                   </div>
                 </div>
-                <div className="row">
+                <div className="upload-command-line m-2">
                   <span className="total-upload">Total Size: {totalSize()}</span>
                   <button className="btn btn-primary btn-upload" onClick={handleUpload}>Upload</button>
                 </div>

@@ -65,8 +65,8 @@ public class FlingService {
 
         mergeNonEmpty(flingDto::getAllowUpload, flingEntity::setAllowUpload);
         mergeNonEmpty(flingDto::getDirectDownload, flingEntity::setDirectDownload);
-        mergeNonEmpty(flingDto::getExpirationClicks, flingEntity::setExpirationClicks);
-        mergeNonEmpty(flingDto::getExpirationTime, flingEntity::setExpirationTime);
+        mergeWithEmpty(flingDto::getExpirationClicks, flingEntity::setExpirationClicks);
+        mergeWithEmpty(flingDto::getExpirationTime, flingEntity::setExpirationTime);
         mergeNonEmpty(flingDto::getName, flingEntity::setName);
         mergeNonEmpty(flingDto::getShared, flingEntity::setShared);
         mergeNonEmpty(flingDto::getShareUrl, flingEntity::setShareUrl);
@@ -130,5 +130,10 @@ public class FlingService {
     private <T> void mergeNonEmpty(Supplier<T> sup, Consumer<T> con) {
         T r = sup.get();
         if(r != null) con.accept(r);
+    }
+
+    private <T> void mergeWithEmpty(Supplier<T> sup, Consumer<T> con) {
+        T r = sup.get();
+        con.accept(r);
     }
 }

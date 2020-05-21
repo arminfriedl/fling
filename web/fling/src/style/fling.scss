@@ -207,11 +207,6 @@ tbody td {
 
 .total-upload {
     float: left;
-    align-self: flex-start;
-}
-
-.btn-upload {
-    align-self: flex-end;
 }
 
 .my-input {
@@ -220,4 +215,17 @@ tbody td {
     width: 100%;
     height: 100%;
     z-index: 0;
+}
+
+.upload-command-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+/************\
+|  Settings  |
+\************/
+
+.share-settings {
 }

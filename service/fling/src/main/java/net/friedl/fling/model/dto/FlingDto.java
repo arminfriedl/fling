@@ -54,18 +54,19 @@ public class FlingDto {
 
     @JsonProperty("expiration")
     private void unpackExpiration(Map<String, Object> expiration) {
-        String type = (String) expiration.getOrDefault("expirationType", null);
+        String type = (String) expiration.getOrDefault("type", null);
         if(type == null) return;
 
         switch(type) {
         case "time":
             this.expirationClicks = null;
             // json can only handle int, long must be given as string
-            this.expirationTime = Instant.ofEpochMilli(Long.parseLong((String) expiration.get("value")));
+            // TODO: this back and forth conversion is a bit hack-ish
+            this.expirationTime = Instant.ofEpochMilli(Long.valueOf(expiration.get("value").toString()));
             break;
         case "clicks":
             this.expirationTime = null;
-            this.expirationClicks = (Integer) expiration.get("value");
+            this.expirationClicks = Integer.valueOf(expiration.get("value").toString());
             break;
         default:
             throw new IllegalArgumentException("Unexpected value '"+type+"'");
