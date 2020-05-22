@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import net.friedl.fling.model.dto.AuthCodeDto;
 import net.friedl.fling.model.dto.FlingDto;
 import net.friedl.fling.service.FlingService;
 
@@ -62,10 +61,5 @@ public class FlingController {
     @DeleteMapping("/fling/{flingId}")
     public void deleteFling(@PathVariable Long flingId) {
         flingService.deleteFlingById(flingId);
-    }
-
-    @PostMapping("/fling/{flingId}/protect")
-    public void protectFling(@PathVariable Long flingId, @RequestBody AuthCodeDto protectCode) {
-        flingService.protect(flingId, protectCode);
     }
 }

@@ -1,24 +1,22 @@
 package net.friedl.fling.service;
 
+import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import net.friedl.fling.model.dto.AuthCodeDto;
 import net.friedl.fling.model.dto.FlingDto;
-import net.friedl.fling.model.mapper.AuthCodeMapper;
 import net.friedl.fling.model.mapper.FlingMapper;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.FlingRepository;
@@ -31,16 +29,13 @@ public class FlingService {
 
     private FlingMapper flingMapper;
 
-    private AuthCodeMapper authCodeMapper;
-
-    @PersistenceContext
-    private EntityManager entityManager;
+    private MessageDigest keyHashDigest;
 
     @Autowired
-    public FlingService(FlingRepository flingRepository, FlingMapper flingMapper, AuthCodeMapper authCodeMapper) {
+    public FlingService(FlingRepository flingRepository, FlingMapper flingMapper, MessageDigest keyHashDigest) {
         this.flingRepository = flingRepository;
         this.flingMapper = flingMapper;
-        this.authCodeMapper = authCodeMapper;
+        this.keyHashDigest = keyHashDigest;
     }
 
     public List<FlingDto> findAll() {
@@ -70,6 +65,7 @@ public class FlingService {
         mergeNonEmpty(flingDto::getName, flingEntity::setName);
         mergeNonEmpty(flingDto::getShared, flingEntity::setShared);
         mergeNonEmpty(flingDto::getShareUrl, flingEntity::setShareUrl);
+        mergeWithEmpty(() -> hashKey(flingDto.getAuthCode()), flingEntity::setAuthCode);
     }
 
     public Optional<FlingDto> findFlingById(Long flingId) {
@@ -85,15 +81,11 @@ public class FlingService {
     }
 
     public boolean hasAuthCode(Long flingId, String authCode) {
-        return flingRepository.getOne(flingId).getAuthCodes()
-                .stream().anyMatch(ae -> ae.getAuthCode().equals(authCode));
-    }
-
-    public void protect(Long flingId, AuthCodeDto authCodeDto) {
         var fling = flingRepository.getOne(flingId);
-        var authCode = authCodeMapper.map(authCodeDto);
 
-        authCode.setFling(fling);
+        if(!StringUtils.hasText(fling.getAuthCode())) return true;
+
+        return fling.getAuthCode().equals(hashKey(authCode));
     }
 
     public String getShareName(String shareUrl) {
@@ -112,7 +104,7 @@ public class FlingService {
         return flingRepository.countArtifactsById(flingId);
     }
 
-    public static String generateShareUrl() {
+    public String generateShareUrl() {
         var key = KeyGenerators
                 .secureRandom(16)
                 .generateKey();
@@ -125,6 +117,12 @@ public class FlingService {
                 .replace('=', 'q')
                 .replace('_', 'u')
                 .replace('-', 'd');
+    }
+
+    public String hashKey(String key) {
+        if(!StringUtils.hasText(key)) return null;
+
+        return new String(Hex.encode(keyHashDigest.digest(key.getBytes())));
     }
 
     private <T> void mergeNonEmpty(Supplier<T> sup, Consumer<T> con) {

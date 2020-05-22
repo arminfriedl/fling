@@ -1,28 +1,58 @@
 import log from 'loglevel';
 import React, {useState, useEffect, useRef} from 'react';
+import {useLocation, useHistory} from 'react-router-dom';
 
 import classNames from 'classnames';
 
 import {flingClient} from '../../util/flingclient';
 
 export default function Settings(props) {
-    let [fling, setFling] = useState({name: "", sharing: {directDownload: false, allowUpload: true, shared: true, shareUrl: "", authCode: ""},
-                                      expiration: {type: "clicks", value: 0}});
-    let [shareUrlUnique, setShareUrlUnique] = useState(true);
+    let defaultState = () => ({name: "", authCode: "",
+                               sharing: {directDownload: false, allowUpload: true, shared: true, shareUrl: ""},
+                               expiration: {}});
 
-    useEffect(() => {
+    let [fling, setFling] = useState(defaultState());
+    let [shareUrlUnique, setShareUrlUnique] = useState(true);
+    let [authCodeChangeable, setAuthCodeChangeable] = useState(false);
+    let location = useLocation();
+    let history = useHistory();
+
+    useEffect(() => loadSettings(), [props.activeFling]);
+
+    function loadSettings() {
         if(props.activeFling) {
             flingClient.getFling(props.activeFling)
                 .then(result => {
                     let f = {...fling, ...result};
                     let s = {...fling.sharing, ...result.sharing};
                     let e = {...fling.expiration, ...result.expiration};
+
                     f.sharing = s;
                     f.expiration = e;
                     setFling(f);
+
+                    setAuthCodeChangeable(!f.authCode);
                 });
         }
-    }, [props.activeFling]);
+    }
+
+    function reloadSettings(ev) {
+        ev.preventDefault();
+        setFling(defaultState());
+        loadSettings();
+    }
+
+    function resetAuthCode(ev) {
+        if(fling.authCode) {
+            let f = {...fling};
+            f.authCode = "";
+            setFling(f);
+        }
+
+        if(!ev.currentTarget.checked) {
+            setAuthCodeChangeable(true);
+        }
+    }
 
     function toggleSharing(ev) {
         let f = {...fling};
@@ -133,11 +163,9 @@ export default function Settings(props) {
 
     function setAuthCode(ev) {
         let f = {...fling};
-        let s = {...fling.sharing};
         let value = ev.currentTarget.value;
 
-        s.authCode = value;
-        f.sharing = s;
+        f.authCode = value;
         setFling(f);
     }
 
@@ -176,13 +204,13 @@ export default function Settings(props) {
                   </div>
                   <div className="col-9 col-sm-12">
                     <div className="input-group">
-                      <input className="form-input" type="text" value={fling.sharing.authCode} onChange={setAuthCode} />
+                      <input className={`form-input ${authCodeChangeable ? "d-visible":"d-hide"}`} type="text" readOnly={!authCodeChangeable} value={fling.authCode} onChange={setAuthCode} />
                       <label className="form-switch ml-2 popover popover-bottom">
-                        <input type="checkbox" checked={!!fling.sharing.authCode} readOnly />
+                        <input type="checkbox" checked={!!fling.authCode} onChange={resetAuthCode} />
                         <i className="form-icon" /> Protected
                         <div className="popover-container card">
                           <div className="card-body">
-                            {!!fling.sharing.authCode ? "Delete the passcode to disable protection": "Set a passcode to enable protection"}
+                            {fling.authCode ? "Click to reset passcode": "Set passcode to enable protection"}
                           </div>
                         </div>
                       </label>
@@ -242,7 +270,10 @@ export default function Settings(props) {
                   </div>
                 </div>
 
-                <input type="submit" className="btn btn-primary float-right" value="Save" />
+                <div className="float-right">
+                  <button className="btn btn-secondary mr-2" onClick={reloadSettings}>Cancel</button>
+                  <input type="submit" className="btn btn-primary" value="Save" />
+                </div>
               </form>
             </div>
           </div>

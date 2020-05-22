@@ -45,11 +45,10 @@ public class FlingEntity {
     @Column(unique = true, nullable = false)
     private String shareUrl;
 
-    @OneToMany(mappedBy = "fling", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ArtifactEntity> artifacts;
+    private String authCode;
 
     @OneToMany(mappedBy = "fling", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AuthCodeEntity> authCodes;
+    private Set<ArtifactEntity> artifacts;
 
     @PrePersist
     private void prePersist() {

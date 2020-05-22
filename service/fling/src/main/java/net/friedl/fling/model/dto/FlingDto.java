@@ -33,6 +33,8 @@ public class FlingDto {
     @JsonIgnore
     private Instant expirationTime;
 
+    private String authCode;
+
     @JsonProperty("sharing")
     private void unpackSharing(Map<String, Object> sharing) {
         this.directDownload = (Boolean) sharing.getOrDefault("directDownload", false);
