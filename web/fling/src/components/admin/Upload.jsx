@@ -138,9 +138,9 @@ export default function Upload(props) {
             return(
                 <>
                   <img className="dropzone-icon" alt="dropzone icon" src={drop}
-                       onDragOver={stopEvent} onDragLeave={stopEvent} />
+                       onDragLeave={stopEvent} />
                   <h5 className="text-primary"
-                      onDragOver={stopEvent} onDragLeave={stopEvent}>
+                      onDragLeave={stopEvent}>
                     Drop now!
                   </h5>
                 </>
@@ -149,8 +149,8 @@ export default function Upload(props) {
             return(
                 <>
                   <img className="dropzone-icon-upload" alt="dropzone icon" src={upload}
-                       onDragOver={stopEvent} onDragLeave={stopEvent} />
-                  <h5 onDragOver={stopEvent} onDragLeave={stopEvent}>
+                       onDragLeave={stopEvent} />
+                  <h5 onDragLeave={stopEvent}>
                     Click or Drop
                   </h5>
                 </>
@@ -162,21 +162,21 @@ export default function Upload(props) {
         <div className="container">
           {logFiles()}
           <div className="columns">
-            <div className="column col-4 pl-0"
+            <div className="column col-4 col-sm-12"
                  onDrop={handleDrop}
                  onClick={handleClick}
                  onDragOver={stopEvent}
                  onDragEnter={handleOnDragEnter}
                  onDragLeave={handleOnDragLeave}>
 
-              <div className="dropzone c-hand py-2" onDragLeave={stopEvent} >
+              <div className="dropzone c-hand py-2" >
                 <input className="d-hide" ref={fileInputRef} type="file" multiple
                        onDragLeave={stopEvent} onChange={handleFileInputChange} />
                 {zoneContent(dragging)}
               </div>
             </div>
 
-            <div className="column col-8 pr-0" >
+            <div className="column col-8 col-sm-12" >
               <div className="file-list">
                 <div className="row">
                   <div className="container">
