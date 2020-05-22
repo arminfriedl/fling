@@ -14,6 +14,7 @@ export default function Upload(props) {
     let fileInputRef = useRef(null);
     let [files, setFiles] = useState([]);
     let [dragging, setDragging] = useState(false);
+    let [dragCount, setDragCount] = useState(0);
 
     useEffect(() => {
         window.addEventListener("dragover",function(e){
@@ -95,6 +96,7 @@ export default function Upload(props) {
 
         setFiles([...files, ...fileListToArray(evFiles)]);
         setDragging(false);
+        setDragCount(0);
     }
 
     function fileListToArray(fileList) {
@@ -110,12 +112,19 @@ export default function Upload(props) {
 
     function handleOnDragEnter(ev) {
         stopEvent(ev);
-        setDragging(true);
+        if(dragCount === 0) setDragging(true);
+
+        setDragCount(dragCount+1);
     }
 
     function handleOnDragLeave(ev) {
         stopEvent(ev);
-        setDragging(false);
+        let dc = dragCount;
+
+        dc -= 1;
+        setDragCount(dc);
+
+        if(dc === 0) setDragging(false);
     }
 
     function stopEvent(ev) {
@@ -137,22 +146,15 @@ export default function Upload(props) {
         if(dragging){
             return(
                 <>
-                  <img className="dropzone-icon" alt="dropzone icon" src={drop}
-                       onDragLeave={stopEvent} />
-                  <h5 className="text-primary"
-                      onDragLeave={stopEvent}>
-                    Drop now!
-                  </h5>
+                  <img className="dropzone-icon" alt="dropzone icon" src={drop} />
+                  <h5 className="text-primary">Drop now!</h5>
                 </>
             );
         }else {
             return(
                 <>
-                  <img className="dropzone-icon-upload" alt="dropzone icon" src={upload}
-                       onDragLeave={stopEvent} />
-                  <h5 onDragLeave={stopEvent}>
-                    Click or Drop
-                  </h5>
+                  <img className="dropzone-icon-upload" alt="dropzone icon" src={upload} />
+                  <h5>Click or Drop</h5>
                 </>
             );
         }
@@ -162,17 +164,17 @@ export default function Upload(props) {
         <div className="container">
           {logFiles()}
           <div className="columns">
-            <div className="column col-4 col-sm-12"
-                 onDrop={handleDrop}
-                 onClick={handleClick}
-                 onDragOver={stopEvent}
-                 onDragEnter={handleOnDragEnter}
-                 onDragLeave={handleOnDragLeave}>
+            <div className="column col-4 col-sm-12">
+              <div className="dropzone c-hand py-2"
+                   onDrop={handleDrop}
+                   onClick={handleClick}
+                   onDragOver={stopEvent}
+                   onDragEnter={handleOnDragEnter}
+                   onDragLeave={handleOnDragLeave}>
 
-              <div className="dropzone c-hand py-2" >
-                <input className="d-hide" ref={fileInputRef} type="file" multiple
-                       onDragLeave={stopEvent} onChange={handleFileInputChange} />
+                <input className="d-hide" ref={fileInputRef} type="file" multiple onChange={handleFileInputChange} />
                 {zoneContent(dragging)}
+
               </div>
             </div>
 
