@@ -17,6 +17,8 @@ export default function Upload(props) {
     let [dragCount, setDragCount] = useState(0);
 
     useEffect(() => {
+        // prevent browser from trying to open the file when drag event
+        // not recognized properly
         window.addEventListener("dragover",function(e){
             e.preventDefault();
         },false);
@@ -26,20 +28,30 @@ export default function Upload(props) {
     });
 
     function fileList() {
-        let fileList = [];
+        function readableBytes(bytes) {
+            if(bytes <= 0) return "0 KB";
 
+            var i = Math.floor(Math.log(bytes) / Math.log(1024)),
+                sizes = ['Byte', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+            return (bytes / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + sizes[i];
+        }
+
+        let fileList = [];
         files.forEach((file,idx) => {
-            fileList.push(
-                <div className="column col-6 col-md-12 mb-2">
-                  <div className="card">
-                    <div className="card-header">
-                      <i className="icon icon-cross float-right c-hand" onClick={ev => deleteFile(idx)}/>
-                      <div className="card-title h5">{file.name}</div>
-                      <div className="card-subtitle text-gray">{(new Date(file.lastModified)).toLocaleString()}</div>
+            if(!file.uploaded) {
+                fileList.push(
+                    <div className="column col-6 col-md-12 mb-2">
+                      <div className="card">
+                        <div className="card-header">
+                          <i className="icon icon-cross float-right c-hand" onClick={ev => deleteFile(idx)}/>
+                          <div className="card-title h5">{file.name}</div>
+                          <div className="card-subtitle text-gray">{(new Date(file.lastModified)).toLocaleString()+", "+readableBytes(file.size)}</div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-            );
+                );
+            }
         });
 
         return fileList;
@@ -136,10 +148,21 @@ export default function Upload(props) {
         log.info("Files so far: ["+files.map((i) => i.name).join(',')+"]");
     }
 
+    function setFileUploaded(idx) {
+        let f = [...files];
+        f[idx].uploaded = true;
+        setFiles(f);
+    }
+
     function handleUpload() {
-        for(let file of files) {
-            artifactClient.postArtifact(props.activeFling, file);
-        }
+        let f = [...files];
+
+        files.forEach((file, idx) => {
+            artifactClient.postArtifact(props.activeFling, file)
+                .then(response => {
+                    setFileUploaded(idx);
+                });
+        });
     }
 
     function zoneContent(dragging) {
