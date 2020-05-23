@@ -13,12 +13,11 @@ export default function Fling() {
     return(
         <div>
           <Navbar />
+
           <div className="container">
             <div className="columns mt-2">
               <div className="column col-sm-12 col-lg-3 col-2"> <FlingList activeFling={fling} /> </div>
-              <div className="column col-sm-12">
-                  <FlingContent activeFling={fling} />
-              </div>
+              <div className="column col-sm-12"><FlingContent activeFling={fling} /></div>
             </div>
           </div>
         </div>

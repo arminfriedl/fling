@@ -34,8 +34,8 @@ public class FlingController {
     }
 
     @PostMapping("/fling")
-    public void postFling(@RequestBody FlingDto flingDto) {
-        flingService.createFling(flingDto);
+    public Long postFling(@RequestBody FlingDto flingDto) {
+        return flingService.createFling(flingDto);
     }
 
     @PutMapping("/fling/{flingId}")

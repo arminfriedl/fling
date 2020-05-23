@@ -42,13 +42,14 @@ public class FlingService {
         return flingMapper.map(flingRepository.findAll());
     }
 
-    public void createFling(FlingDto flingDto) {
+    public Long createFling(FlingDto flingDto) {
         if (!StringUtils.hasText(flingDto.getShareUrl())) {
             flingDto.setShareUrl(generateShareUrl());
         }
 
         var flingEntity = flingMapper.map(flingDto);
-        flingRepository.save(flingEntity);
+        flingEntity = flingRepository.save(flingEntity);
+        return flingEntity.getId();
     }
 
     public Boolean existsShareUrl(String shareUrl) {
