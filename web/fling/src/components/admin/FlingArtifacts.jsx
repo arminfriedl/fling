@@ -15,6 +15,7 @@ function FlingArtifactControl(props) {
             .then(() => props.reloadArtifactsFn());
     }
 
+
     function handleDownload(ev) {
         artifactClient.downloadArtifact(props.artifact.id)
             .then(url => {
@@ -39,12 +40,25 @@ function FlingArtifactControl(props) {
 
 function FlingArtifactRow(props) {
     let [hovered, setHovered] = useState(false);
+    function readableBytes(bytes) {
+        if(bytes <= 0) return "0 KB";
+
+        var i = Math.floor(Math.log(bytes) / Math.log(1024)),
+            sizes = ['Byte', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        return (bytes / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + sizes[i];
+    }
+
+    function localizedUploadDate() {
+        let d = new Date(props.artifact.uploadTime);
+        return d.toLocaleDateString();
+    }
 
     return(
         <tr key={props.artifact.id} className="artifact-row" onMouseOver={() => setHovered(true)} onMouseOut={() => setHovered(false)}>
           <td>{props.artifact.name}</td>
-          <td>{props.artifact.version}</td>
-          <td/>
+          <td>{localizedUploadDate()}</td>
+          <td>{readableBytes(props.artifact.size)}</td>
           <td><FlingArtifactControl artifact={props.artifact} reloadArtifactsFn={props.reloadArtifactsFn} hidden={!hovered} /></td>
         </tr>
     );
@@ -59,7 +73,7 @@ export default function FlingArtifacts(props) {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Date</th>
+                <th>Uploaded</th>
                 <th>Size</th>
                 <th/>
               </tr>

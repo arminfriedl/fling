@@ -2,6 +2,8 @@ package net.friedl.fling.model.dto;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 @Data
@@ -21,4 +23,9 @@ public class ArtifactDto {
     private Instant uploadTime;
 
     private FlingDto fling;
+
+    @JsonProperty("uploadTime")
+    public Long getJsonUploadTime() {
+        return uploadTime.toEpochMilli();
+    }
 }
