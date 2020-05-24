@@ -79,7 +79,9 @@ public class AuthenticationService {
             break;
         case "user":
             authority = FlingAuthority.FLING_USER;
-            flingId = claims.get("fid", Long.class);
+            var sid = claims.get("sid", String.class);
+            flingId = flingService.findFlingByShareId(sid).orElseThrow().getId();
+            break;
         default:
             throw new BadCredentialsException("Invalid token");
         }

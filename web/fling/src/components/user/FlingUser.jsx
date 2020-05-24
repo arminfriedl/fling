@@ -1,10 +1,18 @@
 import log from 'loglevel';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import {useParams, BrowserRouter} from 'react-router-dom';
 
-export default function FlingAdmin() {
-    let { fling } = useParams();
+import {flingClient} from '../../util/flingclient';
+
+export default function FlingUser() {
+    let { shareId } = useParams();
+    let [fling, setFling] = useState({});
+
+    useEffect(() => {
+        flingClient.getFlingByShareId(shareId)
+            .then(f => setFling(f));
+    }, [shareId]);
 
     return(
         <div>

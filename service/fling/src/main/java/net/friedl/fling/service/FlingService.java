@@ -1,15 +1,24 @@
 package net.friedl.fling.service;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
@@ -18,6 +27,9 @@ import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.model.dto.FlingDto;
 import net.friedl.fling.model.mapper.FlingMapper;
+import net.friedl.fling.persistence.archive.Archive;
+import net.friedl.fling.persistence.archive.ArchiveException;
+import net.friedl.fling.persistence.entities.ArtifactEntity;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.FlingRepository;
 
@@ -25,16 +37,17 @@ import net.friedl.fling.persistence.repositories.FlingRepository;
 @Service
 @Transactional
 public class FlingService {
+
     private FlingRepository flingRepository;
-
     private FlingMapper flingMapper;
-
+    private Archive archive;
     private MessageDigest keyHashDigest;
 
     @Autowired
-    public FlingService(FlingRepository flingRepository, FlingMapper flingMapper, MessageDigest keyHashDigest) {
+    public FlingService(FlingRepository flingRepository, FlingMapper flingMapper, Archive archive, MessageDigest keyHashDigest) {
         this.flingRepository = flingRepository;
         this.flingMapper = flingMapper;
+        this.archive = archive;
         this.keyHashDigest = keyHashDigest;
     }
 
@@ -104,6 +117,41 @@ public class FlingService {
 
     public Long countArtifacts(Long flingId) {
         return flingRepository.countArtifactsById(flingId);
+    }
+
+    public Long getFlingSize(Long flingId) {
+        var fling = flingRepository.getOne(flingId);
+
+        return fling.getArtifacts().stream()
+                .map(ae -> ae.getSize())
+                .reduce(0L, (acc, as) -> acc+as);
+    }
+
+    public Pair<InputStream, Long> packageFling(Long flingId) throws IOException, ArchiveException {
+        var fling = flingRepository.getOne(flingId);
+        var tempFile = Files.createTempFile(Long.toString(flingId), ".zip");
+
+        try(var zipStream = new ZipOutputStream(new FileOutputStream(tempFile.toFile()))){
+            for(ArtifactEntity artifactEntity: fling.getArtifacts()) {
+                ZipEntry ze = new ZipEntry(artifactEntity.getName());
+                zipStream.putNextEntry(ze);
+
+                var artifactStream = archive.get(artifactEntity.getDoi());
+                try(var archiveEntryStream = new BufferedInputStream(artifactStream)) {
+                    int b;
+                    while( (b = archiveEntryStream.read()) != -1 ) {
+                        zipStream.write(b);
+                    }
+                } finally {
+                    zipStream.closeEntry();
+                }
+            }
+        }
+
+        var archiveLength = tempFile.toFile().length();
+        var archiveStream =  new FileInputStream(tempFile.toFile());
+
+        return Pair.of(archiveStream, archiveLength);
     }
 
     public String generateShareUrl() {

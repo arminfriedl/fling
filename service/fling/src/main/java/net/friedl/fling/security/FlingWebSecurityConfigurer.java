@@ -58,20 +58,21 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
             .permitAll()
         .and()
         .authorizeRequests()
-            .antMatchers("/api/artifacts/{artifactId}/{downloadId}/download")
-            .permitAll()
+            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/download")
+            .hasAuthority(FlingAuthority.FLING_USER.name())
         .and()
         .authorizeRequests()
             .antMatchers("/api/**")
             .hasAuthority(FlingAuthority.FLING_OWNER.name())
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
-            .access("hasAuthority('"+FlingAuthority.FLING_USER.name()+"') and @authorizationService.allowUpload(#flingId)")
+            // TODO: This is still insecure since URLs are not encrypted
+            .antMatchers("/api/artifacts/{artifactId}/{downloadId}/download")
+            .permitAll()
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/api/artifacts/**")
-            .hasAuthority(FlingAuthority.FLING_USER.name());
+            .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
+            .access("hasAuthority('"+FlingAuthority.FLING_USER.name()+"') and @authorizationService.allowUpload(#flingId)");
         //@formatter:on
     }
 

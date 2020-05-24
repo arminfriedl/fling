@@ -1,8 +1,13 @@
 package net.friedl.fling.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import net.friedl.fling.model.dto.FlingDto;
+import net.friedl.fling.persistence.archive.ArchiveException;
 import net.friedl.fling.service.FlingService;
 
 @RestController
@@ -62,4 +68,19 @@ public class FlingController {
     public void deleteFling(@PathVariable Long flingId) {
         flingService.deleteFlingById(flingId);
     }
+
+
+    @GetMapping(path = "/fling/{flingId}/download")
+    public ResponseEntity<Resource> downloadFling(@PathVariable Long flingId) throws ArchiveException, IOException {
+        var fling = flingService.findFlingById(flingId).orElseThrow();
+        var flingPackage = flingService.packageFling(flingId);
+        var stream = new InputStreamResource(flingPackage.getFirst());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fling.getName() + ".zip" + "\"")
+                .contentLength(flingPackage.getSecond())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(stream);
+    }
+
 }
