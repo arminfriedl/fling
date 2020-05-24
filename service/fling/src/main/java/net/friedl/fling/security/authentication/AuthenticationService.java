@@ -51,16 +51,17 @@ public class AuthenticationService {
     }
 
     public String authenticate(UserAuthDto userAuth) {
-        Long flingId = userAuth.getFlingId();
+        var fling = flingService.findFlingByShareId(userAuth.getShareId())
+                .orElseThrow();
         String authCode = userAuth.getCode();
 
-        if (!flingService.hasAuthCode(flingId, authCode)) {
+        if (!flingService.hasAuthCode(fling.getId(), authCode)) {
             throw new AccessDeniedException("Wrong fling code");
         }
 
         return makeBaseBuilder()
                 .setSubject("user")
-                .claim("fid", flingId)
+                .claim("sid", fling.getShareUrl())
                 .compact();
 
     }

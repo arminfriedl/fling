@@ -45,6 +45,7 @@ export default function New(props) {
     }
 
     function handleClose(ev) {
+        if(ev) ev.preventDefault(); // this is needed, otherwise a submit event is fired
         props.closeModalFn();
     }
 

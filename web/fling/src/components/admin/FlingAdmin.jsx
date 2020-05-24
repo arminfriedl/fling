@@ -7,7 +7,7 @@ import FlingContent from './FlingContent';
 
 import {useParams, BrowserRouter} from 'react-router-dom';
 
-export default function Fling() {
+export default function FlingAdmin() {
     let { fling } = useParams();
 
     return(

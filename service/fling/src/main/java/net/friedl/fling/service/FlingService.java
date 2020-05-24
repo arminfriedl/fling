@@ -48,6 +48,7 @@ public class FlingService {
         }
 
         var flingEntity = flingMapper.map(flingDto);
+        flingEntity.setAuthCode(hashKey(flingEntity.getAuthCode()));
         flingEntity = flingRepository.save(flingEntity);
         return flingEntity.getId();
     }

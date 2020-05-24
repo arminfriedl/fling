@@ -6,7 +6,7 @@ import request, {setAuth} from '../../util/request';
 
 import Error from './Error';
 
-export default () => {
+export default function Login() {
     const [errors, setErrors] = useState([]);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");

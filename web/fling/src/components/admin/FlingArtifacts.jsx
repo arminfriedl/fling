@@ -64,11 +64,22 @@ function FlingArtifactRow(props) {
     );
 }
 
+function FlingInfo(props) {
+    return(
+        <div className="m-2">
+          { /* Add some infos about the fling */ }
+        </div>
+    );
+}
+
 export default function FlingArtifacts(props) {
     const [artifacts, setArtifacts] = useState([]);
     useEffect(getArtifacts, [props.activeFling]);
 
     return (
+        <div>
+          <FlingInfo />
+
           <table className="table">
             <thead>
               <tr>
@@ -82,6 +93,7 @@ export default function FlingArtifacts(props) {
               {artifacts}
             </tbody>
           </table>
+        </div>
     );
 
     function getArtifacts() {
