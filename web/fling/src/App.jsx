@@ -10,16 +10,20 @@ import FlingAdmin from './components/admin/FlingAdmin';
 
 import Unlock from './components/user/Unlock';
 import FlingUser from './components/user/FlingUser';
+import LandingPage from './components/LandingPage';
 
 export default () => {
     return (
         <Switch>
+          <Route exact path="/" component={LandingPage} />
+
           <Route exact path="/admin/login" component={Login} />
           <OwnerRoute exact path="/admin"><FlingAdmin /></OwnerRoute>
           <OwnerRoute path="/admin/:fling"><FlingAdmin /></OwnerRoute>
 
           <Route exact path="/unlock" component={Unlock} />
           <UserRoute exact path="/f/:shareId"><FlingUser /></UserRoute>
+
           <Route match="*">Not implemented</Route>
         </Switch>
     );

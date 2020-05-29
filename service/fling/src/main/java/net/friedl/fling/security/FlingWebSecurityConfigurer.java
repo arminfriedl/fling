@@ -53,17 +53,22 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         .csrf().disable()
         .cors(withDefaults())
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+        // Everybody can try to authenticate
         .authorizeRequests()
             .antMatchers("/api/auth/**")
             .permitAll()
         .and()
+
+        // We need to go from most specific to more general.
+        // Hence, first define user permissions
         .authorizeRequests()
             .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/download")
             .hasAuthority(FlingAuthority.FLING_USER.name())
         .and()
         .authorizeRequests()
-            .antMatchers("/api/**")
-            .hasAuthority(FlingAuthority.FLING_OWNER.name())
+            .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
+            .access("hasAuthority('"+FlingAuthority.FLING_USER.name()+"') and @authorizationService.allowUpload(#flingId)")
         .and()
         .authorizeRequests()
             // TODO: This is still insecure since URLs are not encrypted
@@ -71,8 +76,14 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
             .permitAll()
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
-            .access("hasAuthority('"+FlingAuthority.FLING_USER.name()+"') and @authorizationService.allowUpload(#flingId)");
+            .regexMatchers(HttpMethod.GET, "\\/api\\/fling\\?(shareId=|flingId=)[a-zA-Z0-9]+")
+            .access("@authorizationService.allowFlingAccess(authentication, request)")
+        .and()
+        // And lastly, the owner is allowed everything
+        .authorizeRequests()
+            .antMatchers("/api/**")
+            .hasAuthority(FlingAuthority.FLING_OWNER.name());
+
         //@formatter:on
     }
 

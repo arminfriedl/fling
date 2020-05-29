@@ -250,3 +250,55 @@ tbody td {
 
 .share-settings {
 }
+
+/***************\
+|  LandingPage  |
+\***************/
+
+#landing-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+#landing-header {
+    text-align: center;
+}
+
+#landing-content {
+    display: flex;
+    flex-direction: row;
+}
+
+#landing-tile {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#landing-tile h5 {
+    text-align: center;
+}
+
+#landing-tile img {
+    width: 10rem;
+    height: 8rem;
+}
+
+#landing-tile {
+    a {
+        text-decoration: none;
+        color: $primary-color;
+
+        &:visited {
+            text-decoration: none;
+            color: inherit;
+        }
+    }
+
+    input {
+        max-width: 7rem;
+    }
+}
