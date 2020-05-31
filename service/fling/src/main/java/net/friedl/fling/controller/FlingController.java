@@ -69,11 +69,15 @@ public class FlingController {
         flingService.deleteFlingById(flingId);
     }
 
+    @GetMapping(path = "/fling/{flingId}/package")
+    public String packageFling(@PathVariable Long flingId) throws IOException, ArchiveException {
+        return flingService.packageFling(flingId);
+    }
 
-    @GetMapping(path = "/fling/{flingId}/download")
-    public ResponseEntity<Resource> downloadFling(@PathVariable Long flingId) throws ArchiveException, IOException {
+    @GetMapping(path = "/fling/{flingId}/download/{downloadId}")
+    public ResponseEntity<Resource> downloadFling(@PathVariable Long flingId, @PathVariable String downloadId) throws ArchiveException, IOException {
         var fling = flingService.findFlingById(flingId).orElseThrow();
-        var flingPackage = flingService.packageFling(flingId);
+        var flingPackage = flingService.downloadFling(downloadId);
         var stream = new InputStreamResource(flingPackage.getFirst());
 
         return ResponseEntity.ok()

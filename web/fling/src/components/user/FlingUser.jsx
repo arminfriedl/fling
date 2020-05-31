@@ -5,6 +5,8 @@ import {useParams, BrowserRouter} from 'react-router-dom';
 
 import {flingClient} from '../../util/flingclient';
 
+import DirectDownload from './DirectDownload';
+
 export default function FlingUser() {
     let { shareId } = useParams();
     let [fling, setFling] = useState({});
@@ -16,7 +18,7 @@ export default function FlingUser() {
 
     return(
         <div>
-          Hello
+          {fling.sharing && fling.sharing.directDownload ? <DirectDownload fling={fling} />: ""}
         </div>
     );
 }

@@ -302,3 +302,13 @@ tbody td {
         max-width: 7rem;
     }
 }
+
+/******************\
+|  DirectDownload  |
+\******************/
+
+.direct-download-card {
+    @include shadow;
+    width: 12rem;
+    text-align: center;
+}

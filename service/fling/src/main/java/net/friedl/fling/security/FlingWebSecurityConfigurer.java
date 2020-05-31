@@ -53,18 +53,18 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         .csrf().disable()
         .cors(withDefaults())
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-
         // Everybody can try to authenticate
         .authorizeRequests()
             .antMatchers("/api/auth/**")
             .permitAll()
         .and()
-
         // We need to go from most specific to more general.
         // Hence, first define user permissions
         .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/download")
-            .hasAuthority(FlingAuthority.FLING_USER.name())
+            // TODO: This is still insecure since URLs are not encrypted
+            // TODO: iframe requests don't send the bearer, use cookie instead
+            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/download/{downloadId}")
+            .permitAll()
         .and()
         .authorizeRequests()
             .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
@@ -72,12 +72,19 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         .and()
         .authorizeRequests()
             // TODO: This is still insecure since URLs are not encrypted
+            // TODO: iframe requests don't send the bearer, use cookie instead
             .antMatchers("/api/artifacts/{artifactId}/{downloadId}/download")
             .permitAll()
         .and()
         .authorizeRequests()
+            // TODO: Security by request parameters is just not well supported with spring security
+            // TODO: Change API
             .regexMatchers(HttpMethod.GET, "\\/api\\/fling\\?(shareId=|flingId=)[a-zA-Z0-9]+")
             .access("@authorizationService.allowFlingAccess(authentication, request)")
+        .and()
+        .authorizeRequests()
+            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/**")
+            .access("@authorizationService.allowFlingAccess(#flingId, authentication)")
         .and()
         // And lastly, the owner is allowed everything
         .authorizeRequests()

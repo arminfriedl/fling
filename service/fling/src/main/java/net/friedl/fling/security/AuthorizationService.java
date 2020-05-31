@@ -29,8 +29,12 @@ public class AuthorizationService {
         return userAuth.getShareId().equals(shareUrl);
     }
 
-    public boolean allowFlingAccess(Long flingId) {
-        return false;
+    public boolean allowFlingAccess(Long flingId, FlingToken authentication) {
+        if(authentication.getGrantedFlingAuthority().getAuthority().equals(FlingAuthority.FLING_OWNER.name())) {
+            return true;
+        }
+
+        return authentication.getGrantedFlingAuthority().getFlingId().equals(flingId);
     }
 
     public boolean allowFlingAccess(FlingToken authentication, HttpServletRequest request) {

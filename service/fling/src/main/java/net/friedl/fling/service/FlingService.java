@@ -6,12 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -127,11 +129,12 @@ public class FlingService {
                 .reduce(0L, (acc, as) -> acc+as);
     }
 
-    public Pair<InputStream, Long> packageFling(Long flingId) throws IOException, ArchiveException {
+    public String packageFling(Long flingId) throws IOException, ArchiveException {
         var fling = flingRepository.getOne(flingId);
         var tempFile = Files.createTempFile(Long.toString(flingId), ".zip");
 
         try(var zipStream = new ZipOutputStream(new FileOutputStream(tempFile.toFile()))){
+            zipStream.setLevel(Deflater.BEST_SPEED);
             for(ArtifactEntity artifactEntity: fling.getArtifacts()) {
                 ZipEntry ze = new ZipEntry(artifactEntity.getName());
                 zipStream.putNextEntry(ze);
@@ -148,8 +151,14 @@ public class FlingService {
             }
         }
 
-        var archiveLength = tempFile.toFile().length();
-        var archiveStream =  new FileInputStream(tempFile.toFile());
+        return tempFile.getFileName().toString();
+    }
+
+    public Pair<InputStream, Long> downloadFling(String fileId) throws IOException, ArchiveException {
+        var tempFile = Paths.get(System.getProperty("java.io.tmpdir"), fileId).toFile();
+
+        var archiveLength = tempFile.length();
+        var archiveStream =  new FileInputStream(tempFile);
 
         return Pair.of(archiveStream, archiveLength);
     }
