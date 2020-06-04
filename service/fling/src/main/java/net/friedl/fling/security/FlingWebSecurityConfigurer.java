@@ -68,7 +68,7 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         .and()
         .authorizeRequests()
             .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
-            .access("hasAuthority('"+FlingAuthority.FLING_USER.name()+"') and @authorizationService.allowUpload(#flingId)")
+            .access("@authorizationService.allowUpload(#flingId, authentication)")
         .and()
         .authorizeRequests()
             // TODO: This is still insecure since URLs are not encrypted
@@ -80,6 +80,12 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
             // TODO: Security by request parameters is just not well supported with spring security
             // TODO: Change API
             .regexMatchers(HttpMethod.GET, "\\/api\\/fling\\?(shareId=|flingId=)[a-zA-Z0-9]+")
+            .access("@authorizationService.allowFlingAccess(authentication, request)")
+        .and()
+        .authorizeRequests()
+            // TODO: Security by request parameters is just not well supported with spring security
+            // TODO: Change API
+            .regexMatchers(HttpMethod.GET, "\\/api\\/artifacts\\?(shareId=|flingId=)[a-zA-Z0-9]+")
             .access("@authorizationService.allowFlingAccess(authentication, request)")
         .and()
         .authorizeRequests()

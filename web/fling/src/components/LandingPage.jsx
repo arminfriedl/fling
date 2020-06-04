@@ -44,8 +44,12 @@ export default function LandingPage() {
                 <h5>I got a code...</h5>
                 <img src={view_fling} alt="Fling view" />
                 <div className="input-group mt-2">
-                  <input type="text" className="form-input input-sm" value={shareId} onChange={changeShareId} placeholder="My code" />
-                  <button className="btn btn-secondary input-group-btn btn-sm" onClick={openFling}>Open</button>
+                  <form onSubmit={openFling}>
+                    <div className="input-group">
+                      <input type="text" className="form-input input-sm" value={shareId} onChange={changeShareId} placeholder="My code" />
+                      <input type="submit" className="btn btn-secondary input-group-btn btn-sm" onClick={openFling} value="Open"/>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>

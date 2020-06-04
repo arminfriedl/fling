@@ -15,6 +15,8 @@ public class FlingDto {
 
     private Long id;
 
+    private Instant creationTime;
+
     @JsonIgnore
     private Boolean directDownload;
 
@@ -90,5 +92,10 @@ public class FlingDto {
         }
 
         return expiration;
+    }
+
+    @JsonProperty("creationTime")
+    public Long getJsonUploadTime() {
+        return creationTime.toEpochMilli();
     }
 }

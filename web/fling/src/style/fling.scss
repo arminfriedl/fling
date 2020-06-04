@@ -11,6 +11,10 @@ body {
     background-color: $canvas-base-color;
 }
 
+.card {
+    @include shadow;
+}
+
 /*********\
 |  Login  |
 \*********/
@@ -311,4 +315,41 @@ tbody td {
     @include shadow;
     width: 12rem;
     text-align: center;
+}
+
+/*****************\
+|  FlingUserList  |
+\*****************/
+
+.user-list-loading {
+    .loading {
+        display: inline-block;
+
+        &::after {
+            position: relative;
+            left: unset;
+            top: unset;
+            display: inline-block;
+            margin: unset;
+            animation-duration: 1s;
+        }
+    }
+}
+
+.user-list-artifact {
+    word-break: break-all;
+
+    &:first-child {
+        margin-top: 0.4rem;
+    }
+
+    &:not(:last-child)::after {
+        @extend .user-list-divider;
+        content: '';
+    }
+}
+
+.user-list-divider {
+    @extend .divider;
+    transform: scale(0.98, 1);
 }
