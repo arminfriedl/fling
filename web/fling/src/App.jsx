@@ -22,7 +22,7 @@ export default () => {
           <OwnerRoute path="/admin/:fling"><FlingAdmin /></OwnerRoute>
 
           <Route exact path="/unlock" component={Unlock} />
-          <UserRoute exact path="/f/:shareId"><FlingUser /></UserRoute>
+          <UserRoute path="/f/:shareId"><FlingUser /></UserRoute>
 
           <Route match="*">Not implemented</Route>
         </Switch>

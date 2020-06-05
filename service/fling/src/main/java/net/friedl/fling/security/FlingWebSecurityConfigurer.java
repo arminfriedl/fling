@@ -71,6 +71,10 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
             .access("@authorizationService.allowUpload(#flingId, authentication)")
         .and()
         .authorizeRequests()
+            .antMatchers(HttpMethod.PATCH, "/api/artifacts/{artifactId}")
+            .access("@authorizationService.allowPatchingArtifact(#artifactId, authentication)")
+        .and()
+        .authorizeRequests()
             // TODO: This is still insecure since URLs are not encrypted
             // TODO: iframe requests don't send the bearer, use cookie instead
             .antMatchers("/api/artifacts/{artifactId}/{downloadId}/download")

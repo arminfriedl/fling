@@ -19,7 +19,9 @@ export default function FlingUser() {
 
     return(
         <div>
-          {fling.sharing && fling.sharing.directDownload ? <DirectDownload fling={fling} />: <FlingUserList fling={fling} />}
+          {fling.sharing && fling.sharing.directDownload
+           ? <DirectDownload fling={fling} />
+           : <FlingUserList fling={fling} />}
         </div>
     );
 }

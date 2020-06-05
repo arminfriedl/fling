@@ -10,16 +10,19 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.security.authentication.FlingToken;
 import net.friedl.fling.security.authentication.dto.UserAuthDto;
+import net.friedl.fling.service.ArtifactService;
 import net.friedl.fling.service.FlingService;
 
 @Slf4j
 @Service
 public class AuthorizationService {
     private FlingService flingService;
+    private ArtifactService artifactService;
 
     @Autowired
-    public AuthorizationService(FlingService flingService) {
+    public AuthorizationService(FlingService flingService, ArtifactService artifactService) {
         this.flingService = flingService;
+        this.artifactService = artifactService;
     }
 
     public boolean allowUpload(Long flingId, FlingToken authentication) {
@@ -27,8 +30,14 @@ public class AuthorizationService {
             return true;
         }
 
-        return flingService.findFlingById(flingId).orElseThrow().getAllowUpload()
-                && authentication.getGrantedFlingAuthority().getFlingId().equals(flingId);
+        var uploadAllowed = flingService.findFlingById(flingId).orElseThrow().getAllowUpload();
+
+        return uploadAllowed && authentication.getGrantedFlingAuthority().getFlingId().equals(flingId);
+    }
+
+    public boolean allowPatchingArtifact(Long artifactId, FlingToken authentication) {
+        var flingId = artifactService.findArtifact(artifactId).orElseThrow().getFling().getId();
+        return allowUpload(flingId, authentication);
     }
 
     public boolean allowFlingAccess(UserAuthDto userAuth, String shareUrl) {
@@ -57,7 +66,8 @@ public class AuthorizationService {
                     ? flingService.findFlingByShareId(shareId).orElseThrow().getId()
                     : Long.parseLong(request.getParameter("flingId"));
         } catch (NumberFormatException | NoSuchElementException e) {
-            log.warn("Invalid shareId [shareId=\"{}\"] or flingId [flingId=\"{}\"] found", request.getParameter("shareId"), request.getParameter("flingId"));
+            log.warn("Invalid shareId [shareId=\"{}\"] or flingId [flingId=\"{}\"] found",
+                    request.getParameter("shareId"), request.getParameter("flingId"));
             flingId = null;
         }
 
