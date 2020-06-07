@@ -26,6 +26,8 @@ public class ArtifactDto {
 
     @JsonProperty("uploadTime")
     public Long getJsonUploadTime() {
+        if(uploadTime == null) return null;
+
         return uploadTime.toEpochMilli();
     }
 }

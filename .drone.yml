@@ -1,0 +1,18 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+- name: build-service
+  image: adoptopenjdk:11-hotspot
+  commands:
+    - ls -al
+    - cd service/fling
+    - ./mvnw clean package
+
+- name: build-web
+  image: node:latest
+  commands:
+    - ls -al
+    - cd web/fling
+    - npm install && npm run build
