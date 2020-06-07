@@ -8,11 +8,11 @@ steps:
   commands:
     - ls -al
     - cd service/fling
-    - ./mvnw clean package
+    - ./mvnw -Plocal clean package
 
 - name: build-web
   image: node:latest
   commands:
     - ls -al
     - cd web/fling
-    - npm install && npm run build
+    - npm install && CI=false npm run build
