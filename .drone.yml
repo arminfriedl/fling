@@ -4,11 +4,10 @@ name: default
 
 steps:
 - name: build-service
-  image: adoptopenjdk:11-hotspot
+  image: maven:3.6-jdk-11
   commands:
-    - ls -al
     - cd service/fling
-    - ./mvnw -Plocal clean package
+    - mvn clean package
 
 - name: build-web
   image: node:latest
@@ -16,3 +15,14 @@ steps:
     - ls -al
     - cd web/fling
     - npm install && CI=false npm run build
+
+- name: publish
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    dockerfile: container/Dockerfile
+    repo: arminfriedl/fling
+    tags: dev

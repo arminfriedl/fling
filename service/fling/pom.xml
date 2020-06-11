@@ -21,8 +21,6 @@
 		<bouncycastle.version>1.64</bouncycastle.version>
 		<jwt.version>0.11.1</jwt.version>
 		<spring.version>${project.parent.version}</spring.version>
-		<!-- automatically run annotation processors within the incremental compilation -->
-		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 	</properties>
 
 	<dependencies>
@@ -148,6 +146,8 @@
 			<id>local</id>
 			<properties>
 				<spring.profiles.active>local</spring.profiles.active>
+		        <!-- automatically run annotation processors within the incremental compilation -->
+		        <m2e.apt.activation>jdt_apt</m2e.apt.activation>
 			</properties>
 			<dependencies>
 				<dependency>
