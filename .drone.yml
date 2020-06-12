@@ -5,16 +5,30 @@ name: default
 steps:
 - name: build-service
   image: maven:3.6-jdk-11
+  environment:
+    NEXUS_USER:
+      from_secret: nexus_user
+    NEXUS_PASSWORD:
+      from_secret: nexus_password
   commands:
+    - mkdir -p /root/.m2
+    - cp service/settings.xml /root/.m2/settings.xml
     - cd service/fling
-    - mvn clean package
+    - mvn -Pprod clean deploy
 
 - name: build-web
   image: node:latest
+  environment:
+    NEXUS_USER:
+      from_secret: nexus_user
+    NEXUS_PASSWORD:
+      from_secret: nexus_password
   commands:
     - ls -al
     - cd web/fling
     - npm install && CI=false npm run build
+    - tar czf fling-web-latest.tar.gz build/
+    - curl --user "$NEXUS_USER:$NEXUS_PASSWORD" --upload-file ./fling-web-latest.tar.gz https://nexus.friedl.net/repository/build-artifacts/fling-web-latest.tar.gz
 
 - name: publish
   image: plugins/docker
@@ -24,5 +38,6 @@ steps:
     password:
       from_secret: docker_password
     dockerfile: container/Dockerfile
+    context: ./container
     repo: arminfriedl/fling
     tags: dev

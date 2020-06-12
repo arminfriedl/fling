@@ -137,8 +137,27 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+			<plugin>
+			   <artifactId>maven-deploy-plugin</artifactId>
+			   <executions>
+			      <execution>
+			         <id>default-deploy</id>
+			         <phase>deploy</phase>
+			         <goals>
+			            <goal>deploy</goal>
+			         </goals>
+			      </execution>
+			   </executions>
+			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>https://nexus.friedl.net/repository/maven-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<profiles>
 		<profile>
@@ -161,6 +180,20 @@
 					<artifactId>spring-boot-configuration-processor</artifactId>
 					<optional>true</optional>
 				</dependency>
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<!-- Profile for prod deployment -->
+			<id>prod</id>
+			<properties>
+				<spring.profiles.active>prod</spring.profiles.active>
+			</properties>
+			<dependencies>
 				<dependency>
 					<groupId>com.h2database</groupId>
 					<artifactId>h2</artifactId>

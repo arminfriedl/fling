@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;
+    url: jdbc:h2:file:/var/fling/testdb;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE;
     driverClassName: org.h2.Driver
     username: sa
     password:
@@ -18,7 +18,7 @@ fling:
   archive.fileystem.directory: "/var/fling/files"
   security:
     allowed-origins:
-      - "https://friedl.net"
+      - "https://fling.friedl.net"
       - "http://localhost:3000"
     admin-user: "${FLING_ADMIN_USER:admin}"
     admin-password: "${FLING_ADMIN_PASSWORD:123}"
