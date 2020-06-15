@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +26,17 @@ public class AuthorizationService {
         this.artifactService = artifactService;
     }
 
-    public boolean allowUpload(Long flingId, FlingToken authentication) {
-        if (authentication.getGrantedFlingAuthority().getAuthority().equals(FlingAuthority.FLING_OWNER.name())) {
+    public boolean allowUpload(Long flingId, AbstractAuthenticationToken token) {
+    	if (!(token instanceof FlingToken)) return false;
+
+    	FlingToken flingToken = (FlingToken) token;
+        if (flingToken.getGrantedFlingAuthority().getAuthority().equals(FlingAuthority.FLING_OWNER.name())) {
             return true;
         }
 
         var uploadAllowed = flingService.findFlingById(flingId).orElseThrow().getAllowUpload();
 
-        return uploadAllowed && authentication.getGrantedFlingAuthority().getFlingId().equals(flingId);
+        return uploadAllowed && flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
     }
 
     public boolean allowPatchingArtifact(Long artifactId, FlingToken authentication) {
@@ -44,16 +48,22 @@ public class AuthorizationService {
         return userAuth.getShareId().equals(shareUrl);
     }
 
-    public boolean allowFlingAccess(Long flingId, FlingToken authentication) {
-        if (authentication.getGrantedFlingAuthority().getAuthority().equals(FlingAuthority.FLING_OWNER.name())) {
+    public boolean allowFlingAccess(Long flingId, AbstractAuthenticationToken token) {
+    	if (!(token instanceof FlingToken)) return false;
+    	
+    	FlingToken flingToken = (FlingToken) token;
+        if (flingToken.getGrantedFlingAuthority().getAuthority().equals(FlingAuthority.FLING_OWNER.name())) {
             return true;
         }
 
-        return authentication.getGrantedFlingAuthority().getFlingId().equals(flingId);
+        return flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
     }
 
-    public boolean allowFlingAccess(FlingToken authentication, HttpServletRequest request) {
-        if (authentication.getGrantedFlingAuthority().getAuthority().equals(FlingAuthority.FLING_OWNER.name())) {
+    public boolean allowFlingAccess(AbstractAuthenticationToken token, HttpServletRequest request) {
+    	if (!(token instanceof FlingToken)) return false;
+
+    	FlingToken flingToken = (FlingToken) token;
+        if (flingToken.getGrantedFlingAuthority().getAuthority().equals(FlingAuthority.FLING_OWNER.name())) {
             return true;
         }
 
@@ -71,6 +81,6 @@ public class AuthorizationService {
             flingId = null;
         }
 
-        return authentication.getGrantedFlingAuthority().getFlingId().equals(flingId);
+        return flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
     }
 }
