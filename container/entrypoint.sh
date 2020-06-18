@@ -4,4 +4,4 @@ set -xe
 
 nginx
 
-java -jar service.jar
+java ${FL_JVM_OPTS} -jar service.jar
