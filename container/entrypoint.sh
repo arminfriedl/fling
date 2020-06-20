@@ -2,6 +2,6 @@
 
 set -xe
 
-nginx
+rc-service nginx start
 
 java ${FL_JVM_OPTS} -jar service.jar

@@ -1,7 +1,6 @@
-FROM debian:stable
+FROM alpine:latest
 
-RUN apt-get update -y && apt-get upgrade -y && \
-  apt-get install -y nginx openjdk-11-jre wget && \
+RUN apk add --update --no-cache nginx openjdk11-jre && \
   mkdir -p /var/fling/files && \
   mkdir -p /tmp/fling && \
   wget -O /tmp/fling/service.jar "https://nexus.friedl.net/service/rest/v1/search/assets/download?sort=version&maven.groupId=net.friedl&maven.artifactId=fling&maven.baseVersion=*SNAPSHOT&maven.extension=jar" && \
