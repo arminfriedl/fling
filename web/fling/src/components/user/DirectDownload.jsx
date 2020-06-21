@@ -1,4 +1,3 @@
-import log from 'loglevel';
 import React, {useRef, useState, useEffect} from 'react';
 
 import {flingClient} from '../../util/flingclient';

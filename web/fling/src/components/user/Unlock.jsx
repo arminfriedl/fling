@@ -4,10 +4,7 @@ import {useHistory, useLocation} from 'react-router-dom';
 
 import request, {setAuth} from '../../util/request';
 
-import Error from './Error';
-
 export default function Unlock() {
-    const [errors, setErrors] = useState([]);
     const [authCode, setAuthCode] = useState("");
     const history = useHistory();
     const location = useLocation();
@@ -23,7 +20,7 @@ export default function Unlock() {
                 history.replace(location.state.from);
             })
             .catch(err => {/* ignored */});
-    }, [location]);
+    }, [location, history]);
 
     return (
         <div className="container-center">
@@ -54,8 +51,6 @@ export default function Unlock() {
             })
             .catch(error => {
                 log.error(error);
-                let response = error.response;
-                response.data && response.data.message && setErrors( prev => [response.data.message, ...prev] );
             });
     };
 
@@ -63,8 +58,4 @@ export default function Unlock() {
         let val = ev.target.value;
         setAuthCode(val);
     };
-
-    function clearErrors() {
-        setErrors([]);
-    }
 }

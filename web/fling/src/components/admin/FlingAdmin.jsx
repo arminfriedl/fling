@@ -1,11 +1,10 @@
-import log from 'loglevel';
-import React, {useState} from 'react';
+import React from 'react';
 
 import Navbar from './Navbar';
 import FlingList from './FlingList';
 import FlingContent from './FlingContent';
 
-import {useParams, BrowserRouter} from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 
 export default function FlingAdmin() {
     let { fling } = useParams();

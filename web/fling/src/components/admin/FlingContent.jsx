@@ -1,10 +1,6 @@
 import log from 'loglevel';
-import React, {useState, useEffect, useRef} from 'react';
-import {Switch, Route, Redirect, BrowserRouter, useLocation, useParams, Link} from "react-router-dom";
-
-import classNames from 'classnames';
-
-import {artifactClient} from '../../util/flingclient';
+import React from 'react';
+import {Switch, Route, useLocation, Link} from "react-router-dom";
 
 import FlingArtifacts from './FlingArtifacts';
 import Upload from './Upload';

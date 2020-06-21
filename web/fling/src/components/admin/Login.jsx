@@ -76,6 +76,9 @@ export default function Login() {
         case "password":
             setPassword(val);
             break;
+        default:
+            log.error(`Cannot handle change ${name}`);
+            break;
         }
     };
 

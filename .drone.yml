@@ -26,7 +26,7 @@ steps:
   commands:
     - ls -al
     - cd web/fling
-    - npm install && CI=false npm run build
+    - npm install && npm run build
     - tar czf fling-web-latest.tar.gz build/
     - curl --user "$NEXUS_USER:$NEXUS_PASSWORD" --upload-file ./fling-web-latest.tar.gz https://nexus.friedl.net/repository/build-artifacts/fling-web-latest.tar.gz
 

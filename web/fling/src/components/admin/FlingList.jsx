@@ -7,7 +7,18 @@ import FlingTile from './FlingTile';
 
 export default function FlingList(props) {
     const [flings, setFlings] = useState([]);
-    useEffect(() => { refreshFlingList(); }, []);
+    useEffect(() => { (async () => {
+        let flings = await flingClient.getFlings();
+        let newFlings = [];
+
+        for (let fling of flings) {
+            let flingTile = <FlingTile fling={fling}
+                                       key={fling.id}
+                                       refreshFlingListFn={refreshFlingList} />;
+            newFlings.push(flingTile);
+        }
+        setFlings(newFlings);
+    })(); } , []);
 
     return(
         <div className="panel">
@@ -22,15 +33,5 @@ export default function FlingList(props) {
     );
 
     async function refreshFlingList() {
-        let flings = await flingClient.getFlings();
-        let newFlings = [];
-
-        for (let fling of flings) {
-            let flingTile = <FlingTile fling={fling}
-                                       key={fling.id}
-                                       refreshFlingListFn={refreshFlingList} />;
-            newFlings.push(flingTile);
-        }
-        setFlings(newFlings);
     }
 }

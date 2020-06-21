@@ -1,8 +1,5 @@
 import log from 'loglevel';
-import React, {useState, useEffect, useRef} from 'react';
-import {useLocation, useHistory} from 'react-router-dom';
-
-import classNames from 'classnames';
+import React, {useState, useEffect} from 'react';
 
 import {flingClient} from '../../util/flingclient';
 
@@ -14,13 +11,10 @@ export default function Settings(props) {
     let [fling, setFling] = useState(defaultState());
     let [shareUrlUnique, setShareUrlUnique] = useState(true);
     let [authCodeChangeable, setAuthCodeChangeable] = useState(false);
-    let location = useLocation();
-    let history = useHistory();
+    let [reload, setReload] = useState(true);
 
-    useEffect(() => loadSettings(), [props.activeFling]);
-
-    function loadSettings() {
-        if(props.activeFling) {
+    useEffect(() => {
+        if(props.activeFling && reload) {
             flingClient.getFling(props.activeFling)
                 .then(result => {
                     let f = {...fling, ...result};
@@ -32,14 +26,15 @@ export default function Settings(props) {
                     setFling(f);
 
                     setAuthCodeChangeable(!f.authCode);
+                    setReload(false);
                 });
         }
-    }
+    }, [props.activeFling, reload, fling]);
 
     function reloadSettings(ev) {
         ev.preventDefault();
         setFling(defaultState());
-        loadSettings();
+        setReload(true);
     }
 
     function resetAuthCode(ev) {

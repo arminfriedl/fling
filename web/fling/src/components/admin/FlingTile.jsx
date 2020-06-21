@@ -1,7 +1,7 @@
 import log from 'loglevel';
-import React, {useRef, useState} from 'react';
+import React, {useRef} from 'react';
 import classNames from 'classnames';
-import {Switch, Route, Redirect, BrowserRouter, useLocation, useParams, NavLink} from "react-router-dom";
+import {NavLink} from "react-router-dom";
 
 import {flingClient} from '../../util/flingclient';
 
@@ -10,9 +10,9 @@ function TileAction(props) {
 
     return(
         <div className="tile-action dropdown">
-          <a className="btn btn-link btn dropdown-toggle" tabIndex="0">
+          <button className="btn btn-link btn dropdown-toggle" tabIndex="0">
             <i className="icon icon-more-vert" />
-          </a>
+          </button>
           <ul className="menu text-left">
             <li className="menu-item input-group">
               <div className="input-group">
@@ -30,9 +30,9 @@ function TileAction(props) {
               </div>
             </li>
             <li className="menu-item">
-              <a href="#" className="text-warning" onClick={deleteFling}>
+              <button className="btn btn-link text-warning pl-0" onClick={deleteFling}>
                 <i className="icon icon-delete mr-1" /> Remove
-              </a>
+              </button>
             </li>
           </ul>
         </div>

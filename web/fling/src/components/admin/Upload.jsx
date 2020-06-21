@@ -1,8 +1,5 @@
 import log from 'loglevel';
 import React, {useState, useEffect, useRef} from 'react';
-import {Switch, Route, Redirect, BrowserRouter, useLocation, useParams, Link} from "react-router-dom";
-
-import classNames from 'classnames';
 
 import {artifactClient} from '../../util/flingclient';
 
@@ -155,8 +152,6 @@ export default function Upload(props) {
     }
 
     function handleUpload() {
-        let f = [...files];
-
         files.forEach((file, idx) => {
             artifactClient.postArtifact(props.activeFling, file)
                 .then(response => {

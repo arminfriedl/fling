@@ -1,4 +1,3 @@
-import log from 'loglevel';
 import React, {useState} from 'react';
 
 import admin_area from './resources/admin_area.svg';

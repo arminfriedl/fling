@@ -1,7 +1,4 @@
-import React, {useState} from 'react';
-import classNames from 'classnames';
-
-import log from 'loglevel';
+import React from 'react';
 
 export default (props) => {
     function renderError() {

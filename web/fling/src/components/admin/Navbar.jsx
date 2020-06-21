@@ -1,8 +1,6 @@
-import log from 'loglevel';
 import React, {useState} from 'react';
 
 import New from './New';
-import request from '../../util/request';
 import send from '../resources/send.svg';
 
 export default function Navbar() {

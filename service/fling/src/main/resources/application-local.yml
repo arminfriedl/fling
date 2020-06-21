@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:~/Desktop/testdb;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE;IFEXISTS=TRUE;
+    url: jdbc:h2:file:~/Desktop/testdb;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE;
     driverClassName: org.h2.Driver
     username: sa
     password:

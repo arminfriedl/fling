@@ -1,5 +1,5 @@
 import log from 'loglevel';
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState} from 'react';
 
 import {flingClient} from '../../util/flingclient';
 

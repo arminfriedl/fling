@@ -1,4 +1,3 @@
-import log from 'loglevel';
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 

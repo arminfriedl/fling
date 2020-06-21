@@ -1,7 +1,7 @@
 import log from 'loglevel';
 import React, {useState, useEffect, useRef} from 'react';
 
-import {Switch, Route, Redirect, BrowserRouter, useLocation, useParams, Link} from "react-router-dom";
+import {Switch, Route, useLocation, Link} from "react-router-dom";
 
 import {flingClient, artifactClient} from '../../util/flingclient';
 
@@ -31,10 +31,6 @@ function Artifacts(props) {
         function localizedDate(t) {
             let d = new Date(t);
             return d.toLocaleDateString();
-        }
-
-        function getArtifactInfo() {
-            return `${readableBytes(artifact.size)}, ${localizedDate(artifact.uploadTime)}`;
         }
 
         return(
@@ -208,8 +204,6 @@ function Upload(props) {
     }
 
     function handleUpload() {
-        let f = [...files];
-
         files.forEach((file, idx) => {
             artifactClient.postArtifact(props.fling.id, file)
                 .then(response => {
@@ -280,11 +274,8 @@ export default function FlingUserList(props) {
     let iframeContainer = useRef(null);
     let [infoText, setInfoText] = useState("");
     let [inProgress, setInProgress] = useState(false);
-    let [downloadUrl, setDownloadUrl] = useState("");
 
-    useEffect(() => flingInfo(props.fling.id), [props.fling.id]);
-
-    function flingInfo(flingId) {
+    useEffect((flingId) => {
         if(!flingId) return;
 
         function readableBytes(bytes) {
@@ -313,7 +304,7 @@ export default function FlingUserList(props) {
 
                 setInfoText(`${localizedDate(props.fling.creationTime)} - ${countArtifacts} files - ${readableBytes(totalSize)}`);
             });
-    }
+    }, [props.fling.id, props.fling.creationTime]);
 
     function handleDownload(ev) {
         ev.preventDefault();
@@ -328,7 +319,6 @@ export default function FlingUserList(props) {
                 let frame = document.createElement("iframe");
                 frame.src = downloadUrl;
                 iframeContainer.current.appendChild(frame);
-                setDownloadUrl(downloadUrl);
                 setInProgress(false);
             });
     }

@@ -1,13 +1,9 @@
 import log from 'loglevel';
 import React, {useState, useEffect, useRef} from 'react';
-import {useHistory, useLocation} from 'react-router-dom';
-
-import classNames from 'classnames';
 
 import {artifactClient} from '../../util/flingclient';
 
 function FlingArtifactControl(props) {
-    let history = useHistory();
     let iframeContainer = useRef(null);
 
     function handleDelete(ev) {

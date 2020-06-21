@@ -1,5 +1,4 @@
 import log from 'loglevel';
-import axios from 'axios';
 
 import request from './request';
 
