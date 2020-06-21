@@ -23,11 +23,4 @@ public class ArtifactDto {
     private Instant uploadTime;
 
     private FlingDto fling;
-
-    @JsonProperty("uploadTime")
-    public Long getJsonUploadTime() {
-        if(uploadTime == null) return null;
-
-        return uploadTime.toEpochMilli();
-    }
 }

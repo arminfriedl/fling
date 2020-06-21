@@ -93,9 +93,4 @@ public class FlingDto {
 
         return expiration;
     }
-
-    @JsonProperty("creationTime")
-    public Long getJsonUploadTime() {
-        return creationTime.toEpochMilli();
-    }
 }
