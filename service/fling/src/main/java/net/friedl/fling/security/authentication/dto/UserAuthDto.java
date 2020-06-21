@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class UserAuthDto {
-    String shareId;
-    String code;
+  String shareId;
+  String code;
 }

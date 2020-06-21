@@ -1,26 +1,23 @@
 package net.friedl.fling.model.dto;
 
 import java.time.Instant;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Data;
 
 @Data
 public class ArtifactDto {
-    private String name;
+  private String name;
 
-    private Long id;
+  private Long id;
 
-    private String path;
+  private String path;
 
-    private String doi;
+  private String doi;
 
-    private Long size;
+  private Long size;
 
-    private Integer version;
+  private Integer version;
 
-    private Instant uploadTime;
+  private Instant uploadTime;
 
-    private FlingDto fling;
+  private FlingDto fling;
 }

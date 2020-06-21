@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import net.friedl.fling.security.authentication.dto.OwnerAuthDto;
 import net.friedl.fling.security.authentication.dto.UserAuthDto;
 
@@ -13,20 +12,20 @@ import net.friedl.fling.security.authentication.dto.UserAuthDto;
 @RequestMapping("/api")
 public class AuthenticationController {
 
-    private AuthenticationService authenticationService;
+  private AuthenticationService authenticationService;
 
-    @Autowired
-    public AuthenticationController(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+  @Autowired
+  public AuthenticationController(AuthenticationService authenticationService) {
+    this.authenticationService = authenticationService;
+  }
 
-    @PostMapping("/auth/owner")
-    public String authenticateOwner(@RequestBody OwnerAuthDto ownerAuthDto) {
-        return authenticationService.authenticate(ownerAuthDto);
-    }
+  @PostMapping("/auth/owner")
+  public String authenticateOwner(@RequestBody OwnerAuthDto ownerAuthDto) {
+    return authenticationService.authenticate(ownerAuthDto);
+  }
 
-    @PostMapping("/auth/user")
-    public String authenticateUser(@RequestBody UserAuthDto userAuthDto) {
-        return authenticationService.authenticate(userAuthDto);
-    }
+  @PostMapping("/auth/user")
+  public String authenticateUser(@RequestBody UserAuthDto userAuthDto) {
+    return authenticationService.authenticate(userAuthDto);
+  }
 }
