@@ -19,7 +19,7 @@ public class AuthenticationController {
     this.authenticationService = authenticationService;
   }
 
-  @PostMapping("/auth/owner")
+  @PostMapping(path = "/auth/owner")
   public String authenticateOwner(@RequestBody OwnerAuthDto ownerAuthDto) {
     return authenticationService.authenticate(ownerAuthDto);
   }

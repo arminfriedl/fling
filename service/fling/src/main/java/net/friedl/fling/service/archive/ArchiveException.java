@@ -1,6 +1,6 @@
-package net.friedl.fling.persistence.archive;
+package net.friedl.fling.service.archive;
 
-public class ArchiveException extends Exception {
+public class ArchiveException extends RuntimeException {
   private static final long serialVersionUID = 6216735865308056261L;
 
   /**

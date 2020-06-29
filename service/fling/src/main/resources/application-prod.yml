@@ -16,7 +16,7 @@ logging.level:
   root: WARN
 
 fling:
-  archive.fileystem.directory: "/var/fling/files"
+  archive.filesystem.archive-path: "/var/fling/files"
   security:
     allowed-origins:
       - "https://fling.friedl.net"

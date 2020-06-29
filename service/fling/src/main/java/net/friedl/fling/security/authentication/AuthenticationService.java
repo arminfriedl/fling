@@ -3,6 +3,7 @@ package net.friedl.fling.security.authentication;
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +13,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import net.friedl.fling.model.dto.FlingDto;
 import net.friedl.fling.security.FlingAuthority;
 import net.friedl.fling.security.FlingSecurityConfiguration;
 import net.friedl.fling.security.authentication.dto.OwnerAuthDto;
@@ -49,17 +51,16 @@ public class AuthenticationService {
   }
 
   public String authenticate(UserAuthDto userAuth) {
-    var fling = flingService.findFlingByShareId(userAuth.getShareId())
-        .orElseThrow();
+    FlingDto flingDto = flingService.getByShareId(userAuth.getShareId());
     String authCode = userAuth.getCode();
 
-    if (!flingService.hasAuthCode(fling.getId(), authCode)) {
+    if (!flingService.validateAuthCode(flingDto.getId(), authCode)) {
       throw new AccessDeniedException("Wrong fling code");
     }
 
     return makeBaseBuilder()
         .setSubject("user")
-        .claim("sid", fling.getShareUrl())
+        .claim("sid", flingDto.getShareId())
         .compact();
 
   }
@@ -68,7 +69,7 @@ public class AuthenticationService {
     Claims claims = parseClaims(token);
 
     FlingAuthority authority;
-    Long flingId;
+    UUID flingId;
 
     switch (claims.getSubject()) {
       case "owner":
@@ -77,8 +78,8 @@ public class AuthenticationService {
         break;
       case "user":
         authority = FlingAuthority.FLING_USER;
-        var sid = claims.get("sid", String.class);
-        flingId = flingService.findFlingByShareId(sid).orElseThrow().getId();
+        String sid = claims.get("sid", String.class);
+        flingId = flingService.getByShareId(sid).getId();
         break;
       default:
         throw new BadCredentialsException("Invalid token");

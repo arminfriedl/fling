@@ -1,89 +1,71 @@
 package net.friedl.fling.security;
 
-import java.util.NoSuchElementException;
-import javax.servlet.http.HttpServletRequest;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.security.authentication.FlingToken;
 import net.friedl.fling.security.authentication.dto.UserAuthDto;
-import net.friedl.fling.service.ArtifactService;
 import net.friedl.fling.service.FlingService;
 
 @Slf4j
 @Service
 public class AuthorizationService {
   private FlingService flingService;
-  private ArtifactService artifactService;
 
   @Autowired
-  public AuthorizationService(FlingService flingService, ArtifactService artifactService) {
+  public AuthorizationService(FlingService flingService) {
     this.flingService = flingService;
-    this.artifactService = artifactService;
   }
 
-  public boolean allowUpload(Long flingId, AbstractAuthenticationToken token) {
-    if (!(token instanceof FlingToken))
+  public boolean allowUpload(UUID flingId, AbstractAuthenticationToken token) {
+    if (!(token instanceof FlingToken)) {
+      log.warn("Authorization attempt without fling token for {}. Authorization denied.", flingId);
       return false;
+    }
 
     FlingToken flingToken = (FlingToken) token;
-    if (flingToken.getGrantedFlingAuthority().getAuthority()
-        .equals(FlingAuthority.FLING_OWNER.name())) {
+    if (FlingAuthority.FLING_OWNER.name()
+        .equals(flingToken.getGrantedFlingAuthority().getAuthority())) {
+      log.debug("Owner authorized for upload [id = {}]", flingId);
       return true;
     }
 
-    var uploadAllowed = flingService.findFlingById(flingId).orElseThrow().getAllowUpload();
+    boolean uploadAllowed = flingService.getById(flingId).getAllowUpload();
+    boolean authorized = uploadAllowed
+        && flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
 
-    return uploadAllowed && flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
+    log.debug("User {} authorized for upload [id = {}]", authorized ? "" : "not", flingId);
+
+    return authorized;
   }
 
-  public boolean allowPatchingArtifact(Long artifactId, FlingToken authentication) {
-    var flingId = artifactService.findArtifact(artifactId).orElseThrow().getFling().getId();
-    return allowUpload(flingId, authentication);
-  }
-
-  public boolean allowFlingAccess(UserAuthDto userAuth, String shareUrl) {
-    return userAuth.getShareId().equals(shareUrl);
-  }
-
-  public boolean allowFlingAccess(Long flingId, AbstractAuthenticationToken token) {
-    if (!(token instanceof FlingToken))
+  public boolean allowFlingAccess(UUID flingId, AbstractAuthenticationToken token) {
+    if (!(token instanceof FlingToken)) {
+      log.warn("Authorization attempt without fling token for {}. Authorization denied.", flingId);
       return false;
+    }
 
     FlingToken flingToken = (FlingToken) token;
-    if (flingToken.getGrantedFlingAuthority().getAuthority()
-        .equals(FlingAuthority.FLING_OWNER.name())) {
+    if (FlingAuthority.FLING_OWNER.name()
+        .equals(flingToken.getGrantedFlingAuthority().getAuthority())) {
+      log.debug("Owner authorized for fling access [id = {}]", flingId);
       return true;
     }
 
-    return flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
+    boolean authorized = flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
+    log.debug("User {} authorized for fling access [id = {}]", authorized ? "" : "not", flingId);
+
+    return authorized;
   }
 
-  public boolean allowFlingAccess(AbstractAuthenticationToken token, HttpServletRequest request) {
-    if (!(token instanceof FlingToken))
-      return false;
+  public boolean allowFlingAccess(UserAuthDto userAuth, String shareId) {
+    boolean authorized = userAuth.getShareId().equals(shareId);
+    log.debug("User {} authorized for fling access [shareId = {}]", authorized ? "" : "not",
+        shareId);
 
-    FlingToken flingToken = (FlingToken) token;
-    if (flingToken.getGrantedFlingAuthority().getAuthority()
-        .equals(FlingAuthority.FLING_OWNER.name())) {
-      return true;
-    }
-
-    var shareId = request.getParameter("shareId");
-
-    Long flingId;
-
-    try {
-      flingId = shareId != null
-          ? flingService.findFlingByShareId(shareId).orElseThrow().getId()
-          : Long.parseLong(request.getParameter("flingId"));
-    } catch (NumberFormatException | NoSuchElementException e) {
-      log.warn("Invalid shareId [shareId=\"{}\"] or flingId [flingId=\"{}\"] found",
-          request.getParameter("shareId"), request.getParameter("flingId"));
-      flingId = null;
-    }
-
-    return flingToken.getGrantedFlingAuthority().getFlingId().equals(flingId);
+    return authorized;
   }
+
 }

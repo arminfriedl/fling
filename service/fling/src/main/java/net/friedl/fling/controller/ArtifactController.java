@@ -1,6 +1,8 @@
 package net.friedl.fling.controller;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -10,73 +12,59 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.model.dto.ArtifactDto;
-import net.friedl.fling.persistence.archive.ArchiveException;
 import net.friedl.fling.service.ArtifactService;
+import net.friedl.fling.service.archive.ArchiveService;
 
+@Slf4j
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/artifacts")
 public class ArtifactController {
 
   private ArtifactService artifactService;
+  private ArchiveService archiveService;
 
   @Autowired
-  public ArtifactController(ArtifactService artifactService) {
+  public ArtifactController(ArtifactService artifactService, ArchiveService archiveService) {
     this.artifactService = artifactService;
+    this.archiveService = archiveService;
   }
 
-  @GetMapping(path = "/artifacts", params = "flingId")
-  public List<ArtifactDto> getArtifacts(@RequestParam Long flingId) {
-    return artifactService.findAllArtifacts(flingId);
+  @GetMapping(path = "/{id}")
+  public ArtifactDto getArtifact(@PathVariable UUID id) {
+    return artifactService.getById(id);
   }
 
-  @GetMapping(path = "/artifacts", params = "artifactId")
-  public ResponseEntity<ArtifactDto> getArtifact(@RequestParam Long artifactId) {
-    return ResponseEntity.of(artifactService.findArtifact(artifactId));
+  @DeleteMapping(path = "/{id}")
+  public void deleteArtifact(@PathVariable UUID id) {
+    artifactService.delete(id);
   }
 
-  @PostMapping("/artifacts/{flingId}")
-  public ArtifactDto postArtifact(@PathVariable Long flingId, HttpServletRequest request)
-      throws Exception {
-    return artifactService.storeArtifact(flingId, request.getInputStream());
+  @PostMapping(path = "/{id}/data")
+  public void uploadArtifactData(@PathVariable UUID id, HttpServletRequest request) {
+    try {
+      archiveService.storeArtifact(id, request.getInputStream());
+    } catch (IOException e) {
+      log.error("Could not read input from stream", e);
+      throw new UncheckedIOException(e);
+    }
   }
 
-  @PatchMapping(path = "/artifacts/{artifactId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ArtifactDto patchArtifact(@PathVariable Long artifactId, @RequestBody String body) {
-    return artifactService.mergeArtifact(artifactId, body);
-  }
-
-  @DeleteMapping(path = "/artifacts/{artifactId}")
-  public void deleteArtifact(@PathVariable Long artifactId) throws ArchiveException {
-    artifactService.deleteArtifact(artifactId);
-  }
-
-  @GetMapping(path = "/artifacts/{artifactId}/downloadid")
-  public String getDownloadId(@PathVariable Long artifactId) {
-    return artifactService.generateDownloadId(artifactId);
-  }
-
-  @GetMapping(path = "/artifacts/{artifactId}/{downloadId}/download")
-  public ResponseEntity<Resource> downloadArtifact(@PathVariable Long artifactId,
-      @PathVariable String downloadId)
-      throws ArchiveException {
-
-    var artifact = artifactService.findArtifact(artifactId).orElseThrow();
-    var stream = new InputStreamResource(artifactService.downloadArtifact(downloadId));
+  @GetMapping(path = "/{id}/data")
+  public ResponseEntity<Resource> downloadArtifact(@PathVariable UUID id) {
+    ArtifactDto artifactDto = artifactService.getById(id);
+    InputStreamResource data = new InputStreamResource(archiveService.getArtifact(id));
 
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment;filename=\"" + artifact.getName() + "\"")
-        .contentLength(artifact.getSize())
+            "attachment;filename=\"" + artifactDto.getPath().getFileName() + "\"")
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .body(stream);
+        .body(data);
   }
 
 }

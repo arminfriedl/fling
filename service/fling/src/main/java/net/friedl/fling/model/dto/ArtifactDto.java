@@ -1,23 +1,30 @@
 package net.friedl.fling.model.dto;
 
+import java.nio.file.Path;
 import java.time.Instant;
+import java.util.UUID;
+import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ArtifactDto {
-  private String name;
+  @NotNull
+  private UUID id;
 
-  private Long id;
+  @NotNull
+  private Path path;
+  
+  @Builder.Default
+  private Instant uploadTime = Instant.now();
 
-  private String path;
+  private String archiveId;
 
-  private String doi;
-
-  private Long size;
-
-  private Integer version;
-
-  private Instant uploadTime;
-
-  private FlingDto fling;
+  @Builder.Default
+  private Boolean archived = false;
 }

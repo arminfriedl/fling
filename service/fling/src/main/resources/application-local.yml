@@ -21,7 +21,7 @@ logging.level:
 # spring.http.log-request-details: true
 
 fling:
-  archive.fileystem.directory: "/home/armin/Desktop/fling"
+  archive.filesystem.archive-path: /home/armin/Desktop/fling
   security:
     allowed-origins:
       - "https://friedl.net"

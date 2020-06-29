@@ -1,9 +1,7 @@
 package net.friedl.fling.security;
 
 import static org.springframework.security.config.Customizer.withDefaults;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +10,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -99,20 +94,6 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
             .hasAuthority(FlingAuthority.FLING_OWNER.name());
 
         //@formatter:on
-  }
-
-  private RequestMatcher modificationMethodsAntMatcher(String antPattern) {
-    return multiMethodAntMatcher(antPattern,
-        HttpMethod.PATCH, HttpMethod.PUT,
-        HttpMethod.POST, HttpMethod.DELETE);
-  }
-
-  private RequestMatcher multiMethodAntMatcher(String antPattern, HttpMethod... httpMethods) {
-    List<RequestMatcher> antMatchers = Arrays.stream(httpMethods)
-        .map(m -> new AntPathRequestMatcher(antPattern, m.toString()))
-        .collect(Collectors.toList());
-
-    return new OrRequestMatcher(antMatchers);
   }
 
   @Bean
