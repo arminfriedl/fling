@@ -40,4 +40,7 @@ steps:
     dockerfile: container/Dockerfile
     context: ./container
     repo: arminfriedl/fling
-    tags: dev
+    tags: latest
+  when:
+    branch:
+    - master
