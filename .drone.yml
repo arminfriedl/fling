@@ -47,9 +47,17 @@ steps:
     context: ./container
     repo: arminfriedl/fling
     tags: dev
-  when:
-    branch:
-    - master
+
+- name: runservice
+  image: arminfriedl/fling:dev
+  pull: always
+  detach: true
+
+- name: generate-clients
+  image: openapitools/openapi-generator-cli
+  commands:
+  - sleep 35
+  - java -jar /opt/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar generate -i http://runservice:3000/v3/api-docs -g python -o flingclient
 
 volumes:
 - name: m2-cache
