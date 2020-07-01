@@ -32,3 +32,7 @@ fling:
     admin-password: "${FLING_ADMIN_PASSWORD:123}"
     signing-key: "${FLING_SIGNING_KEY:changeitchangeitchangeitchangeit}"
     jwt-expiration: "${FLING_JWT_EXPIRATION:180000}"
+  api:
+    version: "0"
+    server-url: "http://localhost:8080"
+    server-description: "API server for dev"

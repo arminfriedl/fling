@@ -9,9 +9,32 @@
 			"name": "fling.security",
 			"type": "net.friedl.fling.security.FlingWebSecurityConfiguration",
 			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		},
+		{
+			"name": "fling.api",
+			"type": "net.friedl.fling.controller.OpenApiConfiguration",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
 		}
 	],
 	"properties": [
+		{
+			"name": "fling.api.version",
+			"type": "java.lang.String",
+			"description": "Fling API version",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
+		},
+		{
+			"name": "fling.api.server-url",
+			"type": "java.lang.String",
+			"description": "Base URL for the fling api",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
+		},
+		{
+			"name": "fling.api.server-description",
+			"type": "java.lang.String",
+			"description": "A description for the server to be shown in OAS",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
+		},
 		{
 			"name": "fling.archive.filesystem.archive-path",
 			"type": "java.lang.String",

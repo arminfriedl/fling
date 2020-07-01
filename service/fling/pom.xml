@@ -21,6 +21,7 @@
     <bouncycastle.version>1.64</bouncycastle.version>
     <jwt.version>0.11.1</jwt.version>
     <spring.version>${project.parent.version}</spring.version>
+    <fling.api.version>${project.version}</fling.api.version>
   </properties>
 
   <dependencies>
@@ -102,8 +103,12 @@
   <build>
     <resources>
       <resource>
-        <!-- Replace @spring.profiles.active@ in application.yml by setting 
-          in maven profile See also: profiles section -->
+        <!-- 
+          Replace @...@ placeholder in resources.
+          Replaces:
+          - application.yml | @spring.profiles.active@ | see also: profiles section
+          - application.yml | @fling.api.version@ | see also: properties 
+        -->
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
       </resource>

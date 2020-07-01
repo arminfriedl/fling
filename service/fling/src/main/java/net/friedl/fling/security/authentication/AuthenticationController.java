@@ -5,11 +5,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import net.friedl.fling.security.authentication.dto.OwnerAuthDto;
 import net.friedl.fling.security.authentication.dto.UserAuthDto;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
+@Tag(name = "auth", description = "Operations on /api/auth")
 public class AuthenticationController {
 
   private AuthenticationService authenticationService;
@@ -19,12 +21,12 @@ public class AuthenticationController {
     this.authenticationService = authenticationService;
   }
 
-  @PostMapping(path = "/auth/owner")
+  @PostMapping(path = "/owner")
   public String authenticateOwner(@RequestBody OwnerAuthDto ownerAuthDto) {
     return authenticationService.authenticate(ownerAuthDto);
   }
 
-  @PostMapping("/auth/user")
+  @PostMapping("/user")
   public String authenticateUser(@RequestBody UserAuthDto userAuthDto) {
     return authenticationService.authenticate(userAuthDto);
   }

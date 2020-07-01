@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import net.friedl.fling.model.dto.ArtifactDto;
 import net.friedl.fling.model.dto.FlingDto;
 import net.friedl.fling.service.ArtifactService;
@@ -23,6 +28,7 @@ import net.friedl.fling.service.archive.ArchiveService;
 
 @RestController
 @RequestMapping("/api/fling")
+@Tag(name = "fling", description = "Operations on /api/fling")
 public class FlingController {
 
   private FlingService flingService;
@@ -68,6 +74,12 @@ public class FlingController {
     flingService.delete(id);
   }
 
+  @Operation(responses = {
+      @ApiResponse(responseCode = "200", 
+          content = @Content(
+              mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+              schema = @Schema(type = "string", format = "binary")))
+  })
   @GetMapping(path = "/{id}/data")
   public ResponseEntity<Resource> getFlingData(@PathVariable UUID id) {
     FlingDto flingDto = flingService.getById(id);

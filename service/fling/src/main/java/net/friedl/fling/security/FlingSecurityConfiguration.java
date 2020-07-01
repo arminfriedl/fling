@@ -11,8 +11,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.Data;
 
-@Configuration
 @Data
+@Configuration
 @ConfigurationProperties("fling.security")
 public class FlingSecurityConfiguration {
   private List<String> allowedOrigins;
