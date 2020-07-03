@@ -5,6 +5,9 @@ name: default
 steps:
 - name: build-service
   image: maven:3.6-jdk-11
+  volumes:
+  - name: m2-cache
+    path: /root/.m2
   environment:
     NEXUS_USER:
       from_secret: nexus_user
@@ -18,6 +21,9 @@ steps:
 
 - name: build-web
   image: node:latest
+  volumes:
+  - name: node-cache
+    path: /drone/src/web/fling/node_modules
   environment:
     NEXUS_USER:
       from_secret: nexus_user
@@ -44,3 +50,11 @@ steps:
   when:
     branch:
     - master
+
+volumes:
+- name: m2-cache
+  host:
+    path: /var/services/drone/cache/fling/m2
+- name: node-cache
+  host:
+    path: /var/services/drone/cache/fling/node
