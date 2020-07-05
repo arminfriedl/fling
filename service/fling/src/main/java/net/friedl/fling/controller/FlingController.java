@@ -1,5 +1,6 @@
 package net.friedl.fling.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,7 @@ public class FlingController {
   }
 
   @DeleteMapping("/{id}")
-  public void deleteFling(@PathVariable UUID id) {
+  public void deleteFling(@PathVariable UUID id) throws IOException {
     flingService.delete(id);
   }
 
@@ -81,7 +82,7 @@ public class FlingController {
               schema = @Schema(type = "string", format = "binary")))
   })
   @GetMapping(path = "/{id}/data")
-  public ResponseEntity<Resource> getFlingData(@PathVariable UUID id) {
+  public ResponseEntity<Resource> getFlingData(@PathVariable UUID id) throws IOException {
     FlingDto flingDto = flingService.getById(id);
     InputStreamResource data = new InputStreamResource(archiveService.getFling(id));
 

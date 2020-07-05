@@ -20,7 +20,7 @@ public class FlingConfiguration {
   public MessageDigest keyHashDigest() throws NoSuchAlgorithmException {
     return MessageDigest.getInstance("SHA-512");
   }
-  
+
   @Bean
   public ObjectMapper objectMapper() {
     SimpleModule simpleModule = new SimpleModule();

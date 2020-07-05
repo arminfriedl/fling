@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Schema(name = "Artifact")
 public class ArtifactDto {
   @Schema(accessMode = AccessMode.READ_ONLY, type = "string")

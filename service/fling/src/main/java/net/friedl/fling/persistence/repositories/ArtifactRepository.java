@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import net.friedl.fling.persistence.entities.ArtifactEntity;
 
 public interface ArtifactRepository extends JpaRepository<ArtifactEntity, UUID> {
-  List<ArtifactEntity> findAllByFlingId(Long flingId);
+  List<ArtifactEntity> findAllByFlingId(UUID flingId);
 }

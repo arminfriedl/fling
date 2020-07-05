@@ -1,5 +1,6 @@
 package net.friedl.fling.service;
 
+import java.io.IOException;
 import java.util.UUID;
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
@@ -66,20 +67,11 @@ public class ArtifactService {
    * Deletes an artifact identified by {@code id}. NOOP if the artifact cannot be found.
    * 
    * @param id An {@link UUID} that identifies the artifact
+   * @throws IOException If the deletion failed 
    */
-  public void delete(UUID id) {
-    if (id == null)
-      return;
-
-    ArtifactEntity artifactEntity = artifactRepository.findById(id).orElse(null);
-
-    if (artifactEntity == null) {
-      log.warn("Cannot delete artifact {}. Artifact not found.", id);
-      return;
-    }
-
+  public void delete(UUID id) throws IOException {
     archiveService.deleteArtifact(id);
-    artifactRepository.delete(artifactEntity);
-    log.info("Deleted artifact {}", artifactEntity);
+    artifactRepository.deleteById(id);
+    log.info("Deleted artifact {}", id);
   }
 }

@@ -15,14 +15,12 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.zip.ZipInputStream;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.persistence.entities.ArtifactEntity;
 import net.friedl.fling.persistence.repositories.ArtifactRepository;
@@ -49,6 +47,7 @@ public class FileSystemArchive implements ArchiveService {
   public void postConstruct() {
     try {
       Files.createDirectories(archivePath);
+      log.debug("Using archive path {}", archivePath);
     } catch (IOException e) {
       log.error("Could not create directory at archive path {}", archivePath);
       throw new UncheckedIOException(e);
@@ -60,6 +59,7 @@ public class FileSystemArchive implements ArchiveService {
     filesystems.forEach((uri, zfs) -> {
       try {
         zfs.close();
+        log.debug("Closed {}", uri);
       } catch (IOException e) {
         log.error("Could not close file system for {}", uri);
       }
@@ -67,8 +67,7 @@ public class FileSystemArchive implements ArchiveService {
   }
 
   @Override
-  @SneakyThrows
-  public InputStream getArtifact(UUID artifactId) {
+  public InputStream getArtifact(UUID artifactId) throws IOException {
     log.debug("Reading data for artifact {}", artifactId);
 
     FileSystem zipDisk = getZipDisk(artifactId);
@@ -79,17 +78,15 @@ public class FileSystemArchive implements ArchiveService {
   }
 
   @Override
-  @SneakyThrows
-  public ZipInputStream getFling(UUID flingId) {
+  public InputStream getFling(UUID flingId) throws IOException {
     log.debug("Reading data for fling {}", flingId);
     Path zipDiskPath = archivePath.resolve(flingId.toString() + ".zip");
     log.debug("Zip disk path is {}", zipDiskPath);
-    return new ZipInputStream(new FileInputStream(zipDiskPath.toFile()));
+    return new FileInputStream(zipDiskPath.toFile());
   }
 
   @Override
-  @SneakyThrows
-  public void storeArtifact(UUID artifactId, InputStream artifactStream) {
+  public void storeArtifact(UUID artifactId, InputStream artifactStream) throws IOException {
     log.debug("Storing artifact {}", artifactId);
 
     setArchived(artifactId, false);
@@ -103,8 +100,7 @@ public class FileSystemArchive implements ArchiveService {
   }
 
   @Override
-  @SneakyThrows
-  public void deleteArtifact(UUID artifactId) {
+  public void deleteArtifact(UUID artifactId) throws IOException {
     log.debug("Deleting artifact {}", artifactId);
     FileSystem zipDisk = getZipDisk(artifactId);
     Files.delete(getZipDiskPath(artifactId, zipDisk));
@@ -115,8 +111,7 @@ public class FileSystemArchive implements ArchiveService {
   }
 
   @Override
-  @SneakyThrows
-  public void deleteFling(UUID flingId) {
+  public void deleteFling(UUID flingId) throws IOException {
     URI zipDiskUri = resolveFlingUri(flingId);
 
     log.debug("Closing zip disk at {}", zipDiskUri);
@@ -135,8 +130,9 @@ public class FileSystemArchive implements ArchiveService {
       Path zipDiskPath = archivePath.resolve(flingId.toString() + ".zip");
       log.debug("Deleting fling [.id={}] at {}", flingId, zipDiskPath);
       Files.delete(zipDiskPath);
+      
+      artifactRepository.findAllByFlingId(flingId).forEach(ar -> ar.setArchived(false));
     }
-
   }
 
   private void setArchived(UUID artifactId, boolean archived) {
@@ -168,7 +164,7 @@ public class FileSystemArchive implements ArchiveService {
     URI uri = resolveArtifactUri(artifactId);
     log.debug("Looking for zip disk at uri {}", uri);
 
-    // make sure nobody opens closes, deletes or interleavingly opens the filesystem while it is
+    // make sure nobody closes, deletes or interleavingly opens the filesystem while it is
     // being opened
     synchronized (filesystems) {
       if (!filesystems.containsKey(uri)) {
@@ -214,4 +210,9 @@ public class FileSystemArchive implements ArchiveService {
   public void setArchivePath(String archivePath) {
     this.archivePath = Paths.get(archivePath);
   }
+  
+  public void setArchivePath(Path archivePath) {
+    this.archivePath = archivePath;
+  }
+
 }

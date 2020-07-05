@@ -1,5 +1,6 @@
 package net.friedl.fling.service;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
@@ -87,7 +88,7 @@ public class FlingService {
     return flingMapper.map(flingEntity);
   }
 
-  public void delete(UUID id) {
+  public void delete(UUID id) throws IOException {
     archiveService.deleteFling(id);
     flingRepository.deleteById(id);
     log.debug("Deleted fling {}", id);
@@ -95,6 +96,10 @@ public class FlingService {
 
   public boolean validateAuthCode(UUID id, String authCode) {
     FlingEntity flingEntity = flingRepository.getOne(id);
+    if(StringUtils.hasText(flingEntity.getAuthCode()) != StringUtils.hasText(authCode)) {
+      return false; // only one of them is empty; implicit null safety check
+    }
+
     boolean valid = flingEntity.getAuthCode().equals(hashAuthCode(authCode));
     log.debug("Provided authentication for {} is {} valid", id, valid ? "" : "not");
     return valid;
