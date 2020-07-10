@@ -27,7 +27,7 @@ public class PathDeserializer extends StdDeserializer<Path> {
 
     ObjectCodec codec = p.getCodec();
     JsonNode node = codec.readTree(p);
-    
+
     return Paths.get(node.textValue());
   }
 

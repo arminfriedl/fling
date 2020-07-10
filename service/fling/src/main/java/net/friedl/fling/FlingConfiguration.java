@@ -1,10 +1,10 @@
 package net.friedl.fling;
 
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,9 +16,10 @@ import net.friedl.fling.model.json.PathSerializer;
 
 @Configuration
 public class FlingConfiguration {
+
   @Bean
-  public MessageDigest keyHashDigest() throws NoSuchAlgorithmException {
-    return MessageDigest.getInstance("SHA-512");
+  public PasswordEncoder passwordEncoder() {
+    return new Argon2PasswordEncoder();
   }
 
   @Bean

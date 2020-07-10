@@ -1,14 +1,13 @@
 package net.friedl.fling.service;
 
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,17 +25,16 @@ public class FlingService {
   private FlingRepository flingRepository;
   private FlingMapper flingMapper;
   private ArchiveService archiveService;
-  private MessageDigest keyHashDigest;
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
   public FlingService(FlingRepository flingRepository, FlingMapper flingMapper,
-      ArchiveService archiveService,
-      MessageDigest keyHashDigest) {
+      ArchiveService archiveService, PasswordEncoder passwordEcoder) {
 
     this.flingRepository = flingRepository;
     this.flingMapper = flingMapper;
     this.archiveService = archiveService;
-    this.keyHashDigest = keyHashDigest;
+    this.passwordEncoder = passwordEcoder;
   }
 
   /**
@@ -96,7 +94,7 @@ public class FlingService {
 
   public boolean validateAuthCode(UUID id, String authCode) {
     FlingEntity flingEntity = flingRepository.getOne(id);
-    if(StringUtils.hasText(flingEntity.getAuthCode()) != StringUtils.hasText(authCode)) {
+    if (StringUtils.hasText(flingEntity.getAuthCode()) != StringUtils.hasText(authCode)) {
       return false; // only one of them is empty; implicit null safety check
     }
 
@@ -106,7 +104,7 @@ public class FlingService {
   }
 
   private String hashAuthCode(String authCode) {
-    String hash = new String(Hex.encode(keyHashDigest.digest(authCode.getBytes())));
+    String hash = passwordEncoder.encode(authCode);
     log.debug("Hashed authentication code to {}", hash);
     return hash;
   }

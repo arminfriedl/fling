@@ -14,7 +14,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "Artifact")
-@Getter @Setter
+@Getter
+@Setter
 public class ArtifactEntity {
   @Id
   @GeneratedValue
@@ -25,7 +26,7 @@ public class ArtifactEntity {
 
   @Column(nullable = false)
   private Instant uploadTime = Instant.now();
- 
+
   @Column(unique = true, nullable = true)
   private String archiveId;
 

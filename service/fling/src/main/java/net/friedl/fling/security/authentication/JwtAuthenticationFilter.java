@@ -1,17 +1,19 @@
 package net.friedl.fling.security.authentication;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import lombok.extern.slf4j.Slf4j;
+import net.friedl.fling.service.AuthenticationService;
 
 @Slf4j
 @Component
@@ -34,7 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String header = request.getHeader(HEADER_STRING);
 
     if (header == null || !header.startsWith(TOKEN_PREFIX)) {
-      log.warn("Could not find bearer token. No JWT authentication.");
+      log.info("Anonymous request for {} {}?{}", request.getMethod(), request.getRequestURL(),
+          request.getQueryString());
       filterChain.doFilter(request, response);
       return;
     }
@@ -44,8 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     SecurityContext securityContext = SecurityContextHolder.getContext();
 
     if (securityContext.getAuthentication() == null) {
-      Authentication authentication = authenticationService.parseAuthentication(authToken);
-      securityContext.setAuthentication(authentication);
+      log.info("Authenticating request for {} {}?{}", request.getMethod(), request.getRequestURL(),
+          request.getQueryString());
+      FlingToken token = authenticationService.parseAuthentication(authToken);
+      log.info("Authenticated as {}", token.getAuthorities().stream()
+          .map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+      securityContext.setAuthentication(token);
     }
 
     filterChain.doFilter(request, response);

@@ -75,8 +75,9 @@ public class FlingDtoTest {
     assertThat(violation.getMessage()).isEqualTo("must not be null");
   }
 
+
   @Test
-  void testSetShareId_null_validationFails() {
+  void testSetShareId_null_validationOk() { // must be nullable to support defaulting in service
     FlingDto flingDto = FlingDto.builder()
         .id(new UUID(0L, 0L))
         .name("test")
@@ -87,10 +88,7 @@ public class FlingDtoTest {
 
     Set<ConstraintViolation<FlingDto>> constraintViolations = validator.validate(flingDto);
 
-    assertThat(constraintViolations).hasSize(1);
-    ConstraintViolation<FlingDto> violation = constraintViolations.iterator().next();
-    assertThat(violation.getPropertyPath().toString()).isEqualTo("shareId");
-    assertThat(violation.getMessage()).isEqualTo("must not be null");
+    assertThat(constraintViolations).hasSize(0);
   }
 
   @Test

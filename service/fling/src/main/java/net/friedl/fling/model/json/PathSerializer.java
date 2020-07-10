@@ -19,7 +19,8 @@ public class PathSerializer extends StdSerializer<Path> {
   private static final long serialVersionUID = -1003917305429893614L;
 
   @Override
-  public void serialize(Path value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(Path value, JsonGenerator gen, SerializerProvider provider)
+      throws IOException {
     gen.writeString(value.toString());
   }
 

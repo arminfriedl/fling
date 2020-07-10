@@ -130,7 +130,7 @@ public class FileSystemArchive implements ArchiveService {
       Path zipDiskPath = archivePath.resolve(flingId.toString() + ".zip");
       log.debug("Deleting fling [.id={}] at {}", flingId, zipDiskPath);
       Files.delete(zipDiskPath);
-      
+
       artifactRepository.findAllByFlingId(flingId).forEach(ar -> ar.setArchived(false));
     }
   }
@@ -210,7 +210,7 @@ public class FileSystemArchive implements ArchiveService {
   public void setArchivePath(String archivePath) {
     this.archivePath = Paths.get(archivePath);
   }
-  
+
   public void setArchivePath(Path archivePath) {
     this.archivePath = archivePath;
   }

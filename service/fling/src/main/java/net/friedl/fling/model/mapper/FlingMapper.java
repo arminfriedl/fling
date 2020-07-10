@@ -8,8 +8,10 @@ import net.friedl.fling.persistence.entities.FlingEntity;
 @Mapper(componentModel = "spring")
 public interface FlingMapper {
   FlingDto map(FlingEntity flingEntity);
+
   FlingEntity map(FlingDto flingDto);
 
   List<FlingDto> mapEntities(List<FlingEntity> flingEntities);
+
   List<FlingEntity> mapDtos(List<FlingDto> flingDtos);
 }

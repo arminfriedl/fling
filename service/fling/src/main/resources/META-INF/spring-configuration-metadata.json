@@ -48,7 +48,7 @@
 			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
 		},
 		{
-			"name": "fling.security.admin-user",
+			"name": "fling.security.admin-name",
 			"type": "java.lang.String",
 			"description": "Username of the admin user/instance owner",
 			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"

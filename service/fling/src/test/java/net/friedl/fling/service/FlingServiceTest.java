@@ -11,8 +11,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.codec.Hex;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import net.friedl.fling.model.dto.FlingDto;
 import net.friedl.fling.model.mapper.FlingMapper;
@@ -38,12 +36,12 @@ import net.friedl.fling.service.archive.ArchiveService;
 public class FlingServiceTest {
   @Autowired
   private FlingService flingService;
-  
+
   @Autowired
   private FlingMapper flingMapper;
 
-  @Autowired
-  private MessageDigest keyHashDigest;
+  @MockBean
+  private PasswordEncoder passwordEncoder;
 
   @MockBean
   private FlingRepository flingRepository;
@@ -61,16 +59,11 @@ public class FlingServiceTest {
     public FlingMapper flingMapper() {
       return new FlingMapperImpl();
     }
-    
-    @Bean
-    public MessageDigest keyHashDigest() throws NoSuchAlgorithmException {
-      return MessageDigest.getInstance("SHA-512");
-    }
 
     @Bean
     public FlingService flingService(FlingRepository flingRepository, FlingMapper flingMapper,
-        ArchiveService archiveService, MessageDigest keyHashDigest) {
-      return new FlingService(flingRepository, flingMapper, archiveService, keyHashDigest);
+        ArchiveService archiveService, PasswordEncoder passwordEncoder) {
+      return new FlingService(flingRepository, flingMapper, archiveService, passwordEncoder);
     }
   }
 
@@ -79,7 +72,7 @@ public class FlingServiceTest {
     this.flingEntity1 = new FlingEntity();
     flingEntity1.setId(UUID.randomUUID());
     flingEntity1.setName("fling1");
-    flingEntity1.setAuthCode(new String(Hex.encode(keyHashDigest.digest("authCode1".getBytes()))));
+    flingEntity1.setAuthCode("testhash");
     flingEntity1.setCreationTime(Instant.now());
 
     this.flingEntity2 = new FlingEntity();
@@ -94,7 +87,8 @@ public class FlingServiceTest {
         FlingEntity flingEntity = invocation.getArgument(0);
         flingEntity.setId(UUID.randomUUID());
         return flingEntity;
-      }});
+      }
+    });
   }
 
   @Test
@@ -131,11 +125,11 @@ public class FlingServiceTest {
   public void create_hasAuthCode_setAuthCode() {
     FlingDto flingDto = new FlingDto();
     flingDto.setAuthCode("test");
-    
-    String hashedAuthCode = new String(Hex.encode(keyHashDigest.digest(flingDto.getAuthCode().getBytes())));
-    
+
+    when(passwordEncoder.encode(any(String.class))).thenReturn("testhash");
+
     FlingDto createdFling = flingService.create(flingDto);
-    assertThat(createdFling.getAuthCode(), is(hashedAuthCode));
+    assertThat(createdFling.getAuthCode(), is("testhash"));
   }
 
   @Test
@@ -146,35 +140,36 @@ public class FlingServiceTest {
     FlingDto createdFling = flingService.create(flingDto);
     assertThat(createdFling.getShareId(), is("test"));
   }
-  
+
   @Test
   public void getByShareId_flingDto() {
     when(flingRepository.findByShareId("shareId2")).thenReturn(flingEntity2);
-    
+
     FlingDto foundFling = flingService.getByShareId("shareId2");
     assertThat(foundFling.getShareId(), equalTo("shareId2"));
   }
-  
+
   @Test
   public void delete_deletesFromArchiveAndDb() throws IOException {
     UUID testId = UUID.randomUUID();
     flingService.delete(testId);
-    
+
     verify(archiveService).deleteFling(testId);
     verify(flingRepository).deleteById(testId);
   }
-  
+
   @Test
   public void validateAuthCode_codesMatch_true() {
     when(flingRepository.getOne(flingEntity1.getId())).thenReturn(flingEntity1);
-   
+    when(passwordEncoder.encode("authCode1")).thenReturn("testhash");
+
     assertThat(flingService.validateAuthCode(flingEntity1.getId(), "authCode1"), is(true));
   }
-  
+
   @Test
   public void validateAuthCode_codesDoNotMatch_false() {
-     when(flingRepository.getOne(flingEntity2.getId())).thenReturn(flingEntity2);
-   
+    when(flingRepository.getOne(flingEntity2.getId())).thenReturn(flingEntity2);
+
     assertThat(flingService.validateAuthCode(flingEntity2.getId(), "authCode1"), is(false));
   }
 

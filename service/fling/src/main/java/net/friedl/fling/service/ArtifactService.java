@@ -62,12 +62,12 @@ public class ArtifactService {
     artifactEntity = artifactRepository.save(artifactEntity);
     return artifactMapper.map(artifactEntity);
   }
- 
+
   /**
    * Deletes an artifact identified by {@code id}. NOOP if the artifact cannot be found.
    * 
    * @param id An {@link UUID} that identifies the artifact
-   * @throws IOException If the deletion failed 
+   * @throws IOException If the deletion failed
    */
   public void delete(UUID id) throws IOException {
     archiveService.deleteArtifact(id);

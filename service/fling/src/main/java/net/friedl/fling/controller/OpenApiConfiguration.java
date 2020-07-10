@@ -46,7 +46,7 @@ public class OpenApiConfiguration {
         .scheme("bearer")
         .bearerFormat("JWT");
   }
-  
+
   public Info apiInfo() {
     return new Info()
         .contact(new Contact()

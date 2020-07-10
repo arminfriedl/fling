@@ -162,7 +162,8 @@ public class FileSystemArchiveTest {
   @Test
   public void storeArtifact_setsArchivedTrue() throws IOException, URISyntaxException {
     InputStream artifact2Stream = new FileInputStream(
-        new File(getClass().getClassLoader().getResource("filesystem/artifacts/artifact2").toURI()));
+        new File(
+            getClass().getClassLoader().getResource("filesystem/artifacts/artifact2").toURI()));
     when(artifactRepository.getOne(artifactEntity2.getId())).thenReturn(artifactEntity2);
 
     fileSystemArchive.storeArtifact(artifactEntity2.getId(), artifact2Stream);
@@ -175,11 +176,12 @@ public class FileSystemArchiveTest {
   @Test
   public void storeArtifact_storesArtifactToFlingDisk() throws URISyntaxException, IOException {
     InputStream artifact2Stream = new FileInputStream(
-        new File(getClass().getClassLoader().getResource("filesystem/artifacts/artifact2").toURI()));
+        new File(
+            getClass().getClassLoader().getResource("filesystem/artifacts/artifact2").toURI()));
     when(artifactRepository.getOne(artifactEntity2.getId())).thenReturn(artifactEntity2);
 
     fileSystemArchive.storeArtifact(artifactEntity2.getId(), artifact2Stream);
-    
+
     artifact2Stream.close();
 
     InputStream flingStream =

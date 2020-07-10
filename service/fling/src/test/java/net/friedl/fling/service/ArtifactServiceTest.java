@@ -62,7 +62,8 @@ public class ArtifactServiceTest {
         FlingRepository flingRepository, ArtifactMapper artifactMapper,
         ArchiveService archiveService) {
 
-      return new ArtifactService(artifactRepository, flingRepository, artifactMapper, archiveService);
+      return new ArtifactService(artifactRepository, flingRepository, artifactMapper,
+          archiveService);
     }
   }
 
@@ -72,12 +73,12 @@ public class ArtifactServiceTest {
     artifactEntity1.setId(UUID.randomUUID());
     artifactEntity1.setUploadTime(Instant.EPOCH);
     artifactEntity1.setPath(Path.of("artifact1"));
-    
+
     this.artifactEntity2 = new ArtifactEntity();
     artifactEntity2.setId(UUID.randomUUID());
     artifactEntity2.setUploadTime(Instant.EPOCH.plus(12000, ChronoUnit.DAYS));
-    artifactEntity2.setPath(Path.of("/","/sub","artifact2"));
-    
+    artifactEntity2.setPath(Path.of("/", "/sub", "artifact2"));
+
     this.flingEntity = new FlingEntity();
     flingEntity.setId(UUID.randomUUID());
     flingEntity.setName("fling");
@@ -87,11 +88,11 @@ public class ArtifactServiceTest {
       @Override
       public FlingEntity answer(InvocationOnMock invocation) throws Throwable {
         FlingEntity flingEntity = invocation.getArgument(0);
-        if(flingEntity.getId() == null) flingEntity.setId(UUID.randomUUID());
+        if (flingEntity.getId() == null) flingEntity.setId(UUID.randomUUID());
         return flingEntity;
       }
     });
-    
+
     when(artifactRepository.save(any())).then(new Answer<ArtifactEntity>() {
       @Override
       public ArtifactEntity answer(InvocationOnMock invocation) throws Throwable {
@@ -102,17 +103,17 @@ public class ArtifactServiceTest {
     });
 
   }
-  
+
   @Test
   public void getById_artifactExists_ok() {
     when(artifactRepository.getOne(artifactEntity1.getId())).thenReturn(artifactEntity1);
-    
+
     ArtifactDto artifactDto = artifactService.getById(artifactEntity1.getId());
     assertThat(artifactDto.getId(), equalTo(artifactEntity1.getId()));
     assertThat(artifactDto.getPath(), equalTo(artifactEntity1.getPath()));
     assertThat(artifactDto.getUploadTime(), equalTo(artifactEntity1.getUploadTime()));
   }
-  
+
   @Test
   public void create_createsArtifact_ok() {
     ArtifactDto artifactToCreate = ArtifactDto.builder()
@@ -121,15 +122,15 @@ public class ArtifactServiceTest {
         .build();
 
     ArtifactDto createdArtifact = artifactService.create(flingEntity.getId(), artifactToCreate);
-    
+
     assertThat(createdArtifact.getUploadTime(), equalTo(artifactToCreate.getUploadTime()));
     assertThat(createdArtifact.getPath(), equalTo(artifactToCreate.getPath()));
   }
-  
+
   @Test
   public void delete_deletesArchiveAndArtifactEntry() throws IOException {
     artifactService.delete(artifactEntity1.getId());
-    
+
     verify(archiveService).deleteArtifact(artifactEntity1.getId());
     verify(artifactRepository).deleteById(artifactEntity1.getId());
   }

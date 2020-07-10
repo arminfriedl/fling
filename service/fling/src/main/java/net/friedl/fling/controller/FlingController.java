@@ -3,6 +3,7 @@ package net.friedl.fling.controller;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -51,12 +52,13 @@ public class FlingController {
   }
 
   @PostMapping
-  public FlingDto postFling(@RequestBody FlingDto flingDto) {
+  public FlingDto postFling(@RequestBody @Valid FlingDto flingDto) {
     return flingService.create(flingDto);
   }
 
   @PostMapping("/{id}/artifact")
-  public ArtifactDto postArtifact(@PathVariable UUID id, @RequestBody ArtifactDto artifactDto) {
+  public ArtifactDto postArtifact(@PathVariable UUID id,
+      @RequestBody @Valid ArtifactDto artifactDto) {
     return artifactService.create(id, artifactDto);
   }
 
@@ -76,7 +78,7 @@ public class FlingController {
   }
 
   @Operation(responses = {
-      @ApiResponse(responseCode = "200", 
+      @ApiResponse(responseCode = "200",
           content = @Content(
               mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
               schema = @Schema(type = "string", format = "binary")))

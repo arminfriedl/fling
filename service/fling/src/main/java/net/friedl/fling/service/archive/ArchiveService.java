@@ -17,7 +17,7 @@ public interface ArchiveService {
    * @return An {@link InputStream} for reading the artifact
    */
   InputStream getArtifact(UUID artifactId) throws IOException;
-  
+
   /**
    * Retrieve a packaged fling from the archive
    * 
@@ -37,10 +37,10 @@ public interface ArchiveService {
   /**
    * Delete an artifact
    *
-   * @param id The unique artifact id 
+   * @param id The unique artifact id
    */
   void deleteArtifact(UUID artifactId) throws IOException;
-  
+
   /**
    * Delete a fling
    * 

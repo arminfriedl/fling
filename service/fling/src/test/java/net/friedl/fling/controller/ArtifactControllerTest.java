@@ -110,7 +110,8 @@ class ArtifactControllerTest {
 
     mvc.perform(get("/api/artifacts/{id}/data", ARTIFACT_ID))
         .andExpect(header().doesNotExist(HttpHeaders.CONTENT_DISPOSITION))
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, not(equalTo(MediaType.APPLICATION_OCTET_STREAM_VALUE))))
+        .andExpect(header().string(HttpHeaders.CONTENT_TYPE,
+            not(equalTo(MediaType.APPLICATION_OCTET_STREAM_VALUE))))
         .andExpect(status().isNotFound());
   }
 
@@ -120,7 +121,8 @@ class ArtifactControllerTest {
 
     mvc.perform(get("/api/artifacts/{id}/data", ARTIFACT_ID))
         .andExpect(header().doesNotExist(HttpHeaders.CONTENT_DISPOSITION))
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, not(equalTo(MediaType.APPLICATION_OCTET_STREAM_VALUE))))
+        .andExpect(header().string(HttpHeaders.CONTENT_TYPE,
+            not(equalTo(MediaType.APPLICATION_OCTET_STREAM_VALUE))))
         .andExpect(status().isInternalServerError());
   }
 

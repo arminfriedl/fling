@@ -15,7 +15,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "Fling")
-@Getter @Setter
+@Getter
+@Setter
 public class FlingEntity {
   @Id
   @GeneratedValue

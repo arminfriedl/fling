@@ -31,7 +31,6 @@ public class FlingDto {
   private Instant creationTime = Instant.now();
 
   @Schema(description = "Share id of the fling. Used in the share link.")
-  @NotNull
   private String shareId;
 
   @Schema(description = "Authentication code for password protecting a fling.")

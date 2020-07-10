@@ -3,6 +3,7 @@ package net.friedl.fling.security;
 import static org.springframework.security.config.Customizer.withDefaults;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,7 +17,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.friedl.fling.FlingSecurityConfiguration;
 import net.friedl.fling.security.authentication.JwtAuthenticationFilter;
+import net.friedl.fling.service.AuthorizationService;
 
 @Slf4j
 @Configuration
@@ -24,9 +27,11 @@ import net.friedl.fling.security.authentication.JwtAuthenticationFilter;
 @Getter
 @Setter
 public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
+  @Value("fling.security.allowedOrigins")
+  private List<String> allowedOrigins;
+
   private JwtAuthenticationFilter jwtAuthenticationFilter;
   private AuthorizationService authorizationService;
-  private FlingSecurityConfiguration securityConfiguration;
 
   @Autowired
   public FlingWebSecurityConfigurer(JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -35,7 +40,6 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.authorizationService = authorizationService;
-    this.securityConfiguration = securityConfiguraiton;
   }
 
   @Override
@@ -91,7 +95,7 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         // And lastly, the owner is allowed everything
         .authorizeRequests()
             .antMatchers("/api/**")
-            .hasAuthority(FlingAuthority.FLING_OWNER.name());
+            .hasAuthority(FlingAuthorities.FLING_ADMIN.getAuthority());
 
         //@formatter:on
   }
@@ -100,10 +104,10 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
   public CorsConfigurationSource corsConfigurationSource() {
     // see https://stackoverflow.com/a/43559266
 
-    log.info("Allowed origins: {}", securityConfiguration.getAllowedOrigins());
+    log.info("Allowed origins: {}", allowedOrigins);
 
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(securityConfiguration.getAllowedOrigins());
+    configuration.setAllowedOrigins(allowedOrigins);
     configuration.setAllowedMethods(List.of("*"));
 
     // setAllowCredentials(true) is important, otherwise:

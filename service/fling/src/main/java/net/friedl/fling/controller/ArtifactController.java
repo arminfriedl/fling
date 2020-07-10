@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ import net.friedl.fling.service.archive.ArchiveService;
 @RestController
 @RequestMapping("/api/artifacts")
 @Tag(name = "artifact", description = "Operations on /api/artifacts")
+@Validated
 public class ArtifactController {
 
   private ArtifactService artifactService;
@@ -52,8 +54,9 @@ public class ArtifactController {
 
   @RequestBody(content = @Content(schema = @Schema(type = "string", format = "binary")))
   @PostMapping(path = "/{id}/data")
-  public void uploadArtifactData(@PathVariable UUID id, HttpServletRequest request) throws IOException {
-      archiveService.storeArtifact(id, request.getInputStream());
+  public void uploadArtifactData(@PathVariable UUID id, HttpServletRequest request)
+      throws IOException {
+    archiveService.storeArtifact(id, request.getInputStream());
   }
 
   @ApiResponse(responseCode = "200",

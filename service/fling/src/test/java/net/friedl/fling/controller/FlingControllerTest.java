@@ -97,11 +97,31 @@ public class FlingControllerTest {
   }
 
   @Test
+  public void postFling_validatesBody_notOk() throws Exception {
+    FlingDto invalidFlingDto = new FlingDto();
+
+    mockMvc.perform(post("/api/fling")
+        .content(mapper.writeValueAsString(invalidFlingDto))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   public void postArtifact_ok() throws Exception {
     mockMvc.perform(post("/api/fling/{id}/artifact", flingId)
         .content(mapper.writeValueAsString(artifactDto))
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void postArtifact_validatesBody_notOk() throws Exception {
+    ArtifactDto invalidArtifactDto = new ArtifactDto();
+
+    mockMvc.perform(post("/api/fling/{id}/artifact", flingId)
+        .content(mapper.writeValueAsString(invalidArtifactDto))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
