@@ -1,6 +1,7 @@
 package net.friedl.fling.persistence.entities;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 import javax.persistence.CascadeType;
@@ -10,6 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,8 +27,6 @@ public class FlingEntity {
   private UUID id;
 
   private String name;
-
-  private Instant creationTime = Instant.now();
 
   private Instant expirationTime;
 
@@ -46,4 +48,13 @@ public class FlingEntity {
 
   @OneToMany(mappedBy = "fling", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<ArtifactEntity> artifacts;
+
+  @CreationTimestamp
+  private Date creationTime;
+
+  @UpdateTimestamp
+  private Date updateTime;
+
+  @Version
+  private Long version;
 }

@@ -18,8 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -273,14 +271,12 @@ public class FileSystemArchiveTest {
     // Fling1/Artifact1
     this.artifactEntity1 = new ArtifactEntity();
     artifactEntity1.setId(UUID.randomUUID());
-    artifactEntity1.setUploadTime(Instant.EPOCH);
     artifactEntity1.setPath(Path.of("artifact1"));
     artifactEntity1.setArchived(true);
 
     this.flingEntity1 = new FlingEntity();
     flingEntity1.setId(new UUID(0, 0));
     flingEntity1.setName("fling1");
-    flingEntity1.setCreationTime(Instant.now());
 
     artifactEntity1.setFling(flingEntity1);
 
@@ -288,14 +284,12 @@ public class FileSystemArchiveTest {
     // Fling2/Artifact2
     this.artifactEntity2 = new ArtifactEntity();
     artifactEntity2.setId(UUID.randomUUID());
-    artifactEntity2.setUploadTime(Instant.EPOCH.plus(12000, ChronoUnit.DAYS));
     artifactEntity2.setPath(Path.of("/", "/sub", "artifact2"));
     artifactEntity2.setArchived(false);
 
     this.flingEntity2 = new FlingEntity();
     flingEntity2.setId(new UUID(1, 0));
     flingEntity2.setName("fling2");
-    flingEntity2.setCreationTime(Instant.EPOCH);
 
     artifactEntity2.setFling(flingEntity2);
   }

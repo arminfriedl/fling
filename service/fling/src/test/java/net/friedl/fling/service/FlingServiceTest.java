@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -88,13 +87,11 @@ public class FlingServiceTest {
     flingEntity1.setId(UUID.randomUUID());
     flingEntity1.setName("fling1");
     flingEntity1.setAuthCode("testhash");
-    flingEntity1.setCreationTime(Instant.now());
 
     this.flingEntity2 = new FlingEntity();
     flingEntity2.setId(UUID.randomUUID());
     flingEntity2.setName("fling2");
     flingEntity2.setShareId("shareId2");
-    flingEntity2.setCreationTime(Instant.now());
 
     when(flingRepository.save(any())).then(new Answer<FlingEntity>() {
       @Override

@@ -26,10 +26,9 @@ public class ArtifactDto {
   @NotNull
   private Path path;
 
-  @Schema(type = "integer", format = "int64",
-      description = "Upload time in milliseconds since the unix epoch 01.01.1970 00:00:00 UTC")
-  @Builder.Default
-  private Instant uploadTime = Instant.now();
+  @Schema(type = "integer", format = "int64", accessMode = AccessMode.READ_ONLY,
+      description = "Creation time in milliseconds since the unix epoch 01.01.1970 00:00:00 UTC")
+  private Instant creationTime;
 
   @Schema(accessMode = AccessMode.READ_ONLY, type = "boolean",
       description = "Whether the artifact was successfully persisted in the archive.")

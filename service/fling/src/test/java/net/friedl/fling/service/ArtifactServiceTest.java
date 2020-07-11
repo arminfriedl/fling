@@ -7,8 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,18 +69,15 @@ public class ArtifactServiceTest {
   public void beforeEach() {
     this.artifactEntity1 = new ArtifactEntity();
     artifactEntity1.setId(UUID.randomUUID());
-    artifactEntity1.setUploadTime(Instant.EPOCH);
     artifactEntity1.setPath(Path.of("artifact1"));
 
     this.artifactEntity2 = new ArtifactEntity();
     artifactEntity2.setId(UUID.randomUUID());
-    artifactEntity2.setUploadTime(Instant.EPOCH.plus(12000, ChronoUnit.DAYS));
     artifactEntity2.setPath(Path.of("/", "/sub", "artifact2"));
 
     this.flingEntity = new FlingEntity();
     flingEntity.setId(UUID.randomUUID());
     flingEntity.setName("fling");
-    flingEntity.setCreationTime(Instant.now());
 
     when(flingRepository.save(any())).then(new Answer<FlingEntity>() {
       @Override
@@ -111,19 +106,16 @@ public class ArtifactServiceTest {
     ArtifactDto artifactDto = artifactService.getById(artifactEntity1.getId());
     assertThat(artifactDto.getId(), equalTo(artifactEntity1.getId()));
     assertThat(artifactDto.getPath(), equalTo(artifactEntity1.getPath()));
-    assertThat(artifactDto.getUploadTime(), equalTo(artifactEntity1.getUploadTime()));
   }
 
   @Test
   public void create_createsArtifact_ok() {
     ArtifactDto artifactToCreate = ArtifactDto.builder()
-        .uploadTime(Instant.now())
         .path(Path.of("new", "artifacts"))
         .build();
 
     ArtifactDto createdArtifact = artifactService.create(flingEntity.getId(), artifactToCreate);
 
-    assertThat(createdArtifact.getUploadTime(), equalTo(artifactToCreate.getUploadTime()));
     assertThat(createdArtifact.getPath(), equalTo(artifactToCreate.getPath()));
   }
 

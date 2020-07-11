@@ -9,6 +9,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,9 +27,6 @@ public class ArtifactEntity {
   @Column(nullable = false)
   private Path path;
 
-  @Column(nullable = false)
-  private Instant uploadTime = Instant.now();
-
   @Column(unique = true, nullable = true)
   private String archiveId;
 
@@ -35,4 +35,13 @@ public class ArtifactEntity {
 
   @ManyToOne(optional = false)
   private FlingEntity fling;
+
+  @CreationTimestamp
+  private Instant creationTime;
+
+  @UpdateTimestamp
+  private Instant updateTime;
+
+  @Version
+  private Long version;
 }

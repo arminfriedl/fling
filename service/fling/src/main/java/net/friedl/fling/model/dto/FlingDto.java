@@ -24,11 +24,10 @@ public class FlingDto {
   @NotNull
   private String name;
 
-  @Schema(type = "integer", format = "int64",
+  @Schema(type = "integer", format = "int64", accessMode = AccessMode.READ_ONLY,
       description = "Creation time in milliseconds since the unix epoch 01.01.1970 00:00:00 UTC")
   @NotNull
-  @Builder.Default
-  private Instant creationTime = Instant.now();
+  private Instant creationTime;
 
   @Schema(description = "Share id of the fling. Used in the share link.")
   private String shareId;
