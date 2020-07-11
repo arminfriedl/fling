@@ -11,7 +11,7 @@
   </parent>
   <groupId>net.friedl</groupId>
   <artifactId>fling</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <name>fling</name>
   <description>Simple artifact sharing</description>
 

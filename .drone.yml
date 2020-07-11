@@ -29,12 +29,15 @@ steps:
       from_secret: nexus_user
     NEXUS_PASSWORD:
       from_secret: nexus_password
+    VERSION: 0.1.0-snapshot
   commands:
     - ls -al
     - cd web/fling
     - npm install && npm run build
-    - tar czf fling-web-latest.tar.gz build/
-    - curl --user "$NEXUS_USER:$NEXUS_PASSWORD" --upload-file ./fling-web-latest.tar.gz https://nexus.friedl.net/repository/build-artifacts/fling-web-latest.tar.gz
+    - tar czf fling-web-$VERSION.tar.gz build/
+    - curl --user "$NEXUS_USER:$NEXUS_PASSWORD"
+           --upload-file ./fling-web-$VERSION.tar.gz
+           https://nexus.friedl.net/repository/build-artifacts/fling-web-$VERSION.tar.gz
 
 - name: publish
   image: plugins/docker
@@ -46,7 +49,7 @@ steps:
     dockerfile: container/Dockerfile
     context: ./container
     repo: arminfriedl/fling
-    tags: dev
+    tags: 0.1.0-snapshot
 
 - name: runservice
   image: arminfriedl/fling:dev
