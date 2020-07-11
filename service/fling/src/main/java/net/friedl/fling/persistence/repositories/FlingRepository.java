@@ -11,6 +11,6 @@ public interface FlingRepository extends JpaRepository<FlingEntity, UUID> {
 
   FlingEntity findByShareId(String shareId);
 
-  @Query("SELECT COUNT(*) FROM ArtifactEntity a, FlingEntity f where a.fling=f.id and f.id=:flingId")
-  Long countArtifactsById(Long flingId);
+  @Query("SELECT fe FROM FlingEntity fe JOIN ArtifactEntity ae ON fe.id=ae.id WHERE ae.id=:artifactId")
+  FlingEntity findByArtifactId(UUID artifactId);
 }

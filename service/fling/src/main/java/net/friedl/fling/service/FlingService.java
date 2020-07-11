@@ -3,6 +3,7 @@ package net.friedl.fling.service;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.friedl.fling.model.dto.ArtifactDto;
 import net.friedl.fling.model.dto.FlingDto;
+import net.friedl.fling.model.mapper.ArtifactMapper;
 import net.friedl.fling.model.mapper.FlingMapper;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.FlingRepository;
@@ -24,15 +27,18 @@ public class FlingService {
 
   private FlingRepository flingRepository;
   private FlingMapper flingMapper;
+  private ArtifactMapper artifactMapper;
   private ArchiveService archiveService;
   private PasswordEncoder passwordEncoder;
 
   @Autowired
   public FlingService(FlingRepository flingRepository, FlingMapper flingMapper,
+      ArtifactMapper artifactMapper,
       ArchiveService archiveService, PasswordEncoder passwordEcoder) {
 
     this.flingRepository = flingRepository;
     this.flingMapper = flingMapper;
+    this.artifactMapper = artifactMapper;
     this.archiveService = archiveService;
     this.passwordEncoder = passwordEcoder;
   }
@@ -90,6 +96,12 @@ public class FlingService {
     archiveService.deleteFling(id);
     flingRepository.deleteById(id);
     log.debug("Deleted fling {}", id);
+  }
+
+  public Set<ArtifactDto> getArtifacts(UUID id) {
+    FlingEntity flingEntity = flingRepository.getOne(id);
+    Set<ArtifactDto> artifactDto = artifactMapper.mapEntities(flingEntity.getArtifacts());
+    return artifactDto == null ? Set.of() : artifactDto;
   }
 
   public boolean validateAuthCode(UUID id, String authCode) {

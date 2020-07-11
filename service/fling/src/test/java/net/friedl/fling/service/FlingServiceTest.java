@@ -4,8 +4,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -13,7 +15,9 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,9 +29,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import net.friedl.fling.model.dto.ArtifactDto;
 import net.friedl.fling.model.dto.FlingDto;
+import net.friedl.fling.model.mapper.ArtifactMapper;
+import net.friedl.fling.model.mapper.ArtifactMapperImpl;
 import net.friedl.fling.model.mapper.FlingMapper;
 import net.friedl.fling.model.mapper.FlingMapperImpl;
+import net.friedl.fling.persistence.entities.ArtifactEntity;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.FlingRepository;
 import net.friedl.fling.service.archive.ArchiveService;
@@ -61,9 +69,16 @@ public class FlingServiceTest {
     }
 
     @Bean
+    public ArtifactMapper ArtifactMapper() {
+      return new ArtifactMapperImpl();
+    }
+
+    @Bean
     public FlingService flingService(FlingRepository flingRepository, FlingMapper flingMapper,
+        ArtifactMapper artifactMapper,
         ArchiveService archiveService, PasswordEncoder passwordEncoder) {
-      return new FlingService(flingRepository, flingMapper, archiveService, passwordEncoder);
+      return new FlingService(flingRepository, flingMapper, artifactMapper, archiveService,
+          passwordEncoder);
     }
   }
 
@@ -156,6 +171,37 @@ public class FlingServiceTest {
 
     verify(archiveService).deleteFling(testId);
     verify(flingRepository).deleteById(testId);
+  }
+
+  @Test
+  public void getArtifacts_noArtifacts_emptySet() throws IOException {
+    UUID testId = UUID.randomUUID();
+    FlingEntity flingEntity = new FlingEntity();
+    flingEntity.setId(testId);
+    flingEntity.setArtifacts(null);
+
+    when(flingRepository.getOne(testId)).thenReturn(flingEntity);
+
+    assertThat(flingService.getArtifacts(testId), is(empty()));
+  }
+
+  @Test
+  public void getArtifacts_flingWithArtifacts_artifactSet() throws Exception {
+    UUID artifactId = UUID.randomUUID();
+    ArtifactEntity artifactEntity = new ArtifactEntity();
+    artifactEntity.setId(artifactId);
+
+    UUID flingId = UUID.randomUUID();
+    FlingEntity flingEntity = new FlingEntity();
+    flingEntity.setId(flingId);
+    flingEntity.setArtifacts(Set.of(artifactEntity));
+
+    when(flingRepository.getOne(flingId)).thenReturn(flingEntity);
+
+    Set<ArtifactDto> artifacts = flingService.getArtifacts(flingId);
+    assertThat(artifacts, hasSize(1));
+    assertThat(artifacts.stream().map(ArtifactDto::getId).collect(Collectors.toSet()),
+        contains(artifactId));
   }
 
   @Test

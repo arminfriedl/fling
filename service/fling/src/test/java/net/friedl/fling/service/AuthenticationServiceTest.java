@@ -118,7 +118,7 @@ public class AuthenticationServiceTest {
   @Test
   public void parseAuthentication_owner_AdminAuthority() {
     Jws<Claims> jwsClaims = new DefaultJws<>(new DefaultJwsHeader(),
-        new DefaultClaims(Map.of("sub", "owner")), "signature");
+        new DefaultClaims(Map.of("sub", "admin")), "signature");
     when(jwtParser.parseClaimsJws(any(String.class))).thenReturn(jwsClaims);
 
     FlingToken flingToken = authenticationService.parseAuthentication("any");

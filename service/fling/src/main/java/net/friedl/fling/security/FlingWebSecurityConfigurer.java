@@ -1,5 +1,6 @@
 package net.friedl.fling.security;
 
+import static net.friedl.fling.security.FlingAuthorities.FLING_ADMIN;
 import static org.springframework.security.config.Customizer.withDefaults;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -45,57 +47,79 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     //@formatter:off
-        http
+         http
         .csrf().disable()
         .cors(withDefaults())
+        
+        /**********************************************/
+        /** Authentication Interceptor Configuration **/
+        /**********************************************/
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        // Everybody can try to authenticate
+        // Do not keep authorization token in session. This would interfere with bearer authentication
+        // in that it is possible to authenticate without a bearer token if the session is kept.
+        // Turn off this confusing and non-obvious behavior.
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+
+        
+        /*************************************/
+        /** API Authorization Configuration **/
+        /*************************************/
+        //! Go from most specific to more !//
+        //! general, as first hit counts  !//
+
+        /**********************************/
+        /** Authorization for: /api/auth **/
+        /**********************************/
         .authorizeRequests()
             .antMatchers("/api/auth/**")
             .permitAll()
         .and()
-        // We need to go from most specific to more general.
-        // Hence, first define user permissions
+
+
+        /***********************************/
+        /** Authorization for: /api/fling **/
+        /***********************************/
         .authorizeRequests()
-            // TODO: This is still insecure since URLs are not encrypted
-            // TODO: iframe requests don't send the bearer, use cookie instead
-            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/download/{downloadId}")
-            .permitAll()
+          .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/**")
+          .access("@authorizationService.allowFlingAccess(#flingId, authentication)")
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
-            .access("@authorizationService.allowUpload(#flingId, authentication)")
+          .antMatchers(HttpMethod.GET, "/api/fling/share/{shareId}")
+          .access("@authorizationService.allowFlingAccessByShareId(#shareId, authentication)")
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.PATCH, "/api/artifacts/{artifactId}")
-            .access("@authorizationService.allowPatchingArtifact(#artifactId, authentication)")
+          .antMatchers(HttpMethod.POST, "/api/fling/{flingId}/artifact")
+          .access("@authorizationService.allowUpload(#flingId, authentication)")
+        .and()
+        // only admin can create, delete and list flings
+        .authorizeRequests()
+          .antMatchers(HttpMethod.DELETE, "/api/fling/{flingId}")
+          .hasAnyAuthority(FLING_ADMIN.getAuthority())
         .and()
         .authorizeRequests()
-            // TODO: This is still insecure since URLs are not encrypted
-            // TODO: iframe requests don't send the bearer, use cookie instead
-            .antMatchers("/api/artifacts/{artifactId}/{downloadId}/download")
-            .permitAll()
+          .antMatchers(HttpMethod.POST, "/api/fling")
+          .hasAuthority(FLING_ADMIN.getAuthority())
         .and()
         .authorizeRequests()
-            // TODO: Security by request parameters is just not well supported with spring security
-            // TODO: Change API
-            .regexMatchers(HttpMethod.GET, "\\/api\\/fling\\?(shareId=|flingId=)[a-zA-Z0-9]+")
-            .access("@authorizationService.allowFlingAccess(authentication, request)")
+          .antMatchers(HttpMethod.GET, "/api/fling")
+          .hasAuthority(FLING_ADMIN.getAuthority())
+        .and()
+
+
+        /***************************************/
+        /** Authorization for: /api/artifacts **/
+        /***************************************/
+        .authorizeRequests()
+          .antMatchers(HttpMethod.GET, "/api/artifacts/{artifactId}/**")
+          .access("@authorizationService.allowArtifactAccess(#artifactId, token)")
         .and()
         .authorizeRequests()
-            // TODO: Security by request parameters is just not well supported with spring security
-            // TODO: Change API
-            .regexMatchers(HttpMethod.GET, "\\/api\\/artifacts\\?(shareId=|flingId=)[a-zA-Z0-9]+")
-            .access("@authorizationService.allowFlingAccess(authentication, request)")
+          .antMatchers(HttpMethod.POST, "/api/artifacts/{artifactId}/data")
+          .access("@authorizationService.allowArtifactUpload(#artifactId, token)")
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/**")
-            .access("@authorizationService.allowFlingAccess(#flingId, authentication)")
-        .and()
-        // And lastly, the owner is allowed everything
-        .authorizeRequests()
-            .antMatchers("/api/**")
-            .hasAuthority(FlingAuthorities.FLING_ADMIN.getAuthority());
+          .antMatchers(HttpMethod.DELETE, "/api/artifacts/{artifactId}")
+          .access("@authorizationService.allowArtifactUpload(#artifactId, token)");
 
         //@formatter:on
   }

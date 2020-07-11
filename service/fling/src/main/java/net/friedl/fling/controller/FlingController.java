@@ -2,6 +2,7 @@ package net.friedl.fling.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +57,15 @@ public class FlingController {
     return flingService.create(flingDto);
   }
 
-  @PostMapping("/{id}/artifact")
+  @PostMapping("/{id}/artifacts")
   public ArtifactDto postArtifact(@PathVariable UUID id,
       @RequestBody @Valid ArtifactDto artifactDto) {
     return artifactService.create(id, artifactDto);
+  }
+
+  @GetMapping("/{id}/artifacts")
+  public Set<ArtifactDto> getArtifacts(@PathVariable UUID id) {
+    return flingService.getArtifacts(id);
   }
 
   @GetMapping(path = "/{id}")

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.FlingRepository;
 import net.friedl.fling.security.FlingAuthorities;
 import net.friedl.fling.security.authentication.FlingToken;
@@ -65,4 +66,20 @@ public class AuthorizationService {
     log.info("User not authorized to access fling[.id={}]", flingId);
     return false;
   }
+
+  public boolean allowFlingAccessByShareId(String shareId, AbstractAuthenticationToken token) {
+    FlingEntity flingEntity = flingRepository.findByShareId(shareId);
+    return allowFlingAccess(flingEntity.getId(), token);
+  }
+
+  public boolean allowArtifactAccess(UUID artifactId, AbstractAuthenticationToken token) {
+    FlingEntity flingEntity = flingRepository.findByArtifactId(artifactId);
+    return allowFlingAccess(flingEntity.getId(), token);
+  }
+
+  public boolean allowArtifactUpload(UUID artifactId, AbstractAuthenticationToken token) {
+    FlingEntity flingEntity = flingRepository.findByArtifactId(artifactId);
+    return allowUpload(flingEntity.getId(), token);
+  }
+
 }

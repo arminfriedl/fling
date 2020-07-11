@@ -91,7 +91,7 @@ public class AuthenticationService {
     Claims claims = jwtParser.parseClaimsJws(token).getBody();
 
     switch (claims.getSubject()) {
-      case "owner":
+      case "admin":
         return new FlingToken(new FlingAdminAuthority(), token);
       case "user":
         UUID grantedFlingId = UUID.fromString(claims.get("id", String.class));

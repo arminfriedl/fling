@@ -1,6 +1,7 @@
 package net.friedl.fling.controller;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
 import org.hamcrest.Matchers;
@@ -108,7 +110,7 @@ public class FlingControllerTest {
 
   @Test
   public void postArtifact_ok() throws Exception {
-    mockMvc.perform(post("/api/fling/{id}/artifact", flingId)
+    mockMvc.perform(post("/api/fling/{id}/artifacts", flingId)
         .content(mapper.writeValueAsString(artifactDto))
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
@@ -118,10 +120,47 @@ public class FlingControllerTest {
   public void postArtifact_validatesBody_notOk() throws Exception {
     ArtifactDto invalidArtifactDto = new ArtifactDto();
 
-    mockMvc.perform(post("/api/fling/{id}/artifact", flingId)
+    mockMvc.perform(post("/api/fling/{id}/artifacts", flingId)
         .content(mapper.writeValueAsString(invalidArtifactDto))
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void getArtifact_noFlingWithId_notFound() throws Exception {
+    doThrow(EntityNotFoundException.class).when(flingService).getArtifacts(flingId);
+
+    mockMvc.perform(get("/api/fling/{id}/artifacts", flingId))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void getArtifact_flingFound_noArtifacts_emptySet() throws Exception {
+    when(flingService.getArtifacts(flingId)).thenReturn(Set.of());
+
+    mockMvc.perform(get("/api/fling/{id}/artifacts", flingId))
+        .andExpect(status().isOk())
+        .andExpect(content().string(equalTo("[]")));
+  }
+
+  @Test
+  public void getArtifact_flingFound_hasArtifacts_returnArtifacts() throws Exception {
+    ArtifactDto artifactDto1 = ArtifactDto.builder()
+        .id(new UUID(0, 0))
+        .build();
+
+    ArtifactDto artifactDto2 = ArtifactDto.builder()
+        .id(new UUID(0, 1))
+        .build();
+
+    when(flingService.getArtifacts(flingId)).thenReturn(Set.of(artifactDto1, artifactDto2));
+
+    mockMvc.perform(get("/api/fling/{id}/artifacts", flingId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id",
+            anyOf(equalTo(new UUID(0, 0).toString()), equalTo(new UUID(0, 1).toString()))))
+        .andExpect(jsonPath("$[1].id",
+            anyOf(equalTo(new UUID(0, 0).toString()), equalTo(new UUID(0, 1).toString()))));
   }
 
   @Test
