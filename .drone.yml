@@ -50,6 +50,8 @@ steps:
     context: ./container
     repo: arminfriedl/fling
     tags: 0.1.0-snapshot
+    build_args:
+      - VERSION=0.1.0-snapshot
 
 - name: runservice
   image: arminfriedl/fling:0.1.0-snapshot
