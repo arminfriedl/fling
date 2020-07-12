@@ -28,6 +28,6 @@ fling:
     signing-key: "changeitchangeitchangeitchangeit"
     jwt-expiration: "180000"
   api:
-    version: "0"
+    version: "0.1.0-snapshot"
     server-url: "http://localhost:8080"
     server-description: "API server for dev"

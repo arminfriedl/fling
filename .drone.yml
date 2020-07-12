@@ -52,15 +52,28 @@ steps:
     tags: 0.1.0-snapshot
 
 - name: runservice
-  image: arminfriedl/fling:dev
+  image: arminfriedl/fling:0.1.0-snapshot
   pull: always
   detach: true
 
 - name: generate-clients
-  image: openapitools/openapi-generator-cli
+  image: alpine
   commands:
-  - sleep 35
-  - java -jar /opt/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar generate -i http://runservice:3000/v3/api-docs -g python -o flingclient
+  - apk add --update --no-cache openjdk11 npm
+  - sleep 20
+  - npm install @openapitools/openapi-generator-cli -g
+  - openapi-generator generate
+      -i http://runservice:3000/v3/api-docs
+      -g python
+      -o flingclient.py
+      --enable-post-process-file
+  - openapi-generator generate
+      -i http://runservice:3000/v3/api-docs
+      -g javascript
+      --additional-properties projectName=flinclient,usePromises=true
+      -o flingclient.js
+      --enable-post-process-file
+  - cd flingclient.js && npm install && npm run build && cd ..
 
 volumes:
 - name: m2-cache
