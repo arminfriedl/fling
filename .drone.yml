@@ -19,6 +19,13 @@ steps:
     - cd service/fling
     - mvn -Pprod clean deploy
 
+- name: runservice
+  image: adoptopenjdk:11-jre-hotspot
+  commands:
+  - cd service/fling/target
+  - java -jar fling-0.1.0-SNAPSHOT.jar
+  detach: true
+
 - name: build-web
   image: node:latest
   volumes:
@@ -53,11 +60,6 @@ steps:
     build_args:
       - VERSION=0.1.0-snapshot
 
-- name: runservice
-  image: arminfriedl/fling:0.1.0-snapshot
-  pull: always
-  detach: true
-
 - name: generate-clients
   image: alpine
   environment:
@@ -71,13 +73,13 @@ steps:
   - npm install @openapitools/openapi-generator-cli -g
   # Python client
   - openapi-generator generate
-      -i http://runservice:3000/v3/api-docs
+      -i http://runservice:8080/v3/api-docs
       -g python
       -o flingclient.py
       --enable-post-process-file
   # JavaScript client
   - openapi-generator generate
-      -i http://runservice:3000/v3/api-docs
+      -i http://runservice:8080/v3/api-docs
       -g javascript
       --additional-properties projectName=flingclient,usePromises=true,npmRepository=https://nexus.friedl.net/repository/npm-private/
       -o flingclient.js

@@ -17,4 +17,5 @@ echo "Replacing ${CUR_VERSION} with ${NEW_VERSION}"
 sed -i "s/${CUR_VERSION^^}/${NEW_VERSION^^}/g" service/fling/pom.xml
 sed -i "s/${CUR_VERSION,,}/${NEW_VERSION,,}/g" service/fling/src/main/resources/*.yml
 sed -i "s/${CUR_VERSION,,}/${NEW_VERSION,,}/g" .drone.yml
-sed -i "s/${CUR_VERSION,,}/${NEW_VERSION,,}/g" VERSION
+sed -i "s/${CUR_VERSION^^}/${NEW_VERSION^^}/g" .drone.yml
+sed -i "s/${CUR_VERSION}/${NEW_VERSION}/g" VERSION
