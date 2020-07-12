@@ -58,22 +58,33 @@ steps:
 
 - name: generate-clients
   image: alpine
+  environment:
+    NEXUS_USER:
+      from_secret: nexus_user
+    NEXUS_PASSWORD:
+      from_secret: nexus_password
   commands:
   - apk add --update --no-cache openjdk11 npm
   - sleep 20
   - npm install @openapitools/openapi-generator-cli -g
+  # Python client
   - openapi-generator generate
       -i http://runservice:3000/v3/api-docs
       -g python
       -o flingclient.py
       --enable-post-process-file
+  # JavaScript client
   - openapi-generator generate
       -i http://runservice:3000/v3/api-docs
       -g javascript
-      --additional-properties projectName=flinclient,usePromises=true
+      --additional-properties projectName=flingclient,usePromises=true,npmRepository=https://nexus.friedl.net/repository/npm-private/
       -o flingclient.js
       --enable-post-process-file
-  - cd flingclient.js && npm install && npm run build && cd ..
+  - cd flingclient.js && npm install && npm run build
+  - echo "https://nexus.friedl.net/repository/npm-private/" >> .npmrc
+  - echo -n "_auth=" >> .npmrc && echo -n "$NEXUS_USER:$NEXUS_PASSWORD" | base64 >> .npmrc
+  - echo "email=dev@friedl.net" >> .npmrc
+  - npm publish
 
 volumes:
 - name: m2-cache
