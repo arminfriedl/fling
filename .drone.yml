@@ -81,7 +81,7 @@ steps:
   - openapi-generator generate
       -i http://runservice:8080/v3/api-docs
       -g javascript
-      --additional-properties projectName=flingclient,usePromises=true,npmRepository=https://nexus.friedl.net/repository/npm-private/
+      --additional-properties projectName=@fling/flingclient,usePromises=true,npmRepository=https://nexus.friedl.net/repository/npm-private/
       -o flingclient.js
       --enable-post-process-file
   - cd flingclient.js && npm install && npm run build

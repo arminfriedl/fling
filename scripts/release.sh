@@ -18,4 +18,5 @@ sed -i "s/${CUR_VERSION^^}/${NEW_VERSION^^}/g" service/fling/pom.xml
 sed -i "s/${CUR_VERSION,,}/${NEW_VERSION,,}/g" service/fling/src/main/resources/*.yml
 sed -i "s/${CUR_VERSION,,}/${NEW_VERSION,,}/g" .drone.yml
 sed -i "s/${CUR_VERSION^^}/${NEW_VERSION^^}/g" .drone.yml
+sed -i "s/${CUR_VERSION,,}/${NEW_VERSION,,}/g" web/fling/package.json
 sed -i "s/${CUR_VERSION}/${NEW_VERSION}/g" VERSION
