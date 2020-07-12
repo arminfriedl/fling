@@ -1,6 +1,7 @@
 package net.friedl.fling.service;
 
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,7 @@ public class AuthorizationService {
 
   public boolean allowFlingAccessByShareId(String shareId, AbstractAuthenticationToken token) {
     FlingEntity flingEntity = flingRepository.findByShareId(shareId);
+    if(flingEntity == null) { throw new EntityNotFoundException("No entity for shareId="+shareId); }
     return allowFlingAccess(flingEntity.getId(), token);
   }
 

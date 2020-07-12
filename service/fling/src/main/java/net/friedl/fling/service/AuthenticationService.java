@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -70,6 +71,8 @@ public class AuthenticationService {
   public Optional<String> authenticate(UserAuthDto userAuth) {
     log.info("Authenticating for fling [.shareId={}]", userAuth.getShareId());
     FlingEntity flingEntity = flingRepository.findByShareId(userAuth.getShareId());
+    if(flingEntity == null) { throw new EntityNotFoundException("No entity for shareId="+userAuth.getShareId()); }
+
     String providedAuthCodeHash = passwordEncoder.encode(userAuth.getAuthCode());
     String actualAuthCodeHash = flingEntity.getAuthCode();
 

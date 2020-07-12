@@ -4,9 +4,8 @@ import static net.friedl.fling.security.FlingAuthorities.FLING_ADMIN;
 import static org.springframework.security.config.Customizer.withDefaults;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,12 +23,11 @@ import net.friedl.fling.security.authentication.JwtAuthenticationFilter;
 import net.friedl.fling.service.AuthorizationService;
 
 @Slf4j
-@Configuration
 @EnableWebSecurity
+@ConfigurationProperties(prefix = "fling.security")
 @Getter
 @Setter
 public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
-  @Value("fling.security.allowedOrigins")
   private List<String> allowedOrigins;
 
   private JwtAuthenticationFilter jwtAuthenticationFilter;

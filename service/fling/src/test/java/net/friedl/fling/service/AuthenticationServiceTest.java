@@ -11,6 +11,7 @@ import java.security.Key;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,18 @@ public class AuthenticationServiceTest {
     when(passwordEncoder.encode(any(String.class))).thenReturn("authCodeHash");
 
     assertThat(authenticationService.authenticate(userAuthDto), not(equalTo(Optional.empty())));
+  }
+
+  @Test
+  public void authenticate_noFlingForShareId_throws() {
+      UserAuthDto userAuthDto = UserAuthDto.builder()
+        .authCode("authCode")
+        .shareId("doesNotExist").build();
+
+    when(flingRepository.findByShareId(any(String.class))).thenReturn(null);
+    when(passwordEncoder.encode(any(String.class))).thenReturn("authCodeHash");
+
+    assertThrows(EntityNotFoundException.class, () -> authenticationService.authenticate(userAuthDto));
   }
 
   @Test

@@ -3,7 +3,7 @@ package net.friedl.fling;
 import java.nio.file.Path;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -19,7 +19,7 @@ public class FlingConfiguration {
 
   @Bean
   public PasswordEncoder passwordEncoder() {
-    return new Argon2PasswordEncoder();
+    return new BCryptPasswordEncoder();
   }
 
   @Bean

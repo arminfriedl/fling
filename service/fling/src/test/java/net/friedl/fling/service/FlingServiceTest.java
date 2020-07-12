@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -159,6 +161,13 @@ public class FlingServiceTest {
 
     FlingDto foundFling = flingService.getByShareId("shareId2");
     assertThat(foundFling.getShareId(), equalTo("shareId2"));
+  }
+
+  @Test
+  public void getByShareId_noFlingForShareId_throws() {
+    when(flingRepository.findByShareId(any(String.class))).thenReturn(null);
+
+    assertThrows(EntityNotFoundException.class, () -> flingService.getByShareId("doesNotExist"));
   }
 
   @Test

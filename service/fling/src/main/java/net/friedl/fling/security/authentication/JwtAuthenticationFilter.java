@@ -36,8 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String header = request.getHeader(HEADER_STRING);
 
     if (header == null || !header.startsWith(TOKEN_PREFIX)) {
-      log.info("Anonymous request for {} {}?{}", request.getMethod(), request.getRequestURL(),
-          request.getQueryString());
+      log.info("Anonymous request for {} {}{}", request.getMethod(), request.getRequestURL(),
+          request.getQueryString() != null ? "?"+request.getQueryString(): "");
       filterChain.doFilter(request, response);
       return;
     }
@@ -47,8 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     SecurityContext securityContext = SecurityContextHolder.getContext();
 
     if (securityContext.getAuthentication() == null) {
-      log.info("Authenticating request for {} {}?{}", request.getMethod(), request.getRequestURL(),
-          request.getQueryString());
+      log.info("Authenticating request for {} {}{}", request.getMethod(), request.getRequestURL(),
+          request.getQueryString() != null ? "?"+request.getQueryString(): "");
       FlingToken token = authenticationService.parseAuthentication(authToken);
       log.info("Authenticated as {}", token.getAuthorities().stream()
           .map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));

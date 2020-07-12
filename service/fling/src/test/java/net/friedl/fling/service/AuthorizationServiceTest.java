@@ -1,10 +1,13 @@
 package net.friedl.fling.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,4 +116,14 @@ public class AuthorizationServiceTest {
     FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
     assertTrue(authorizationService.allowFlingAccess(new UUID(0, 0), flingToken));
   }
+
+  @Test
+  public void allowFlingAccessByShareId_noFlingForShareId_throw() {
+    FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
+    when(flingRepository.findByShareId(any(String.class))).thenReturn(null);
+
+    assertThrows(EntityNotFoundException.class,
+        () -> authorizationService.allowFlingAccessByShareId("doesNotExist", flingToken));
+  }
+
 }

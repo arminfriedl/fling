@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.keygen.KeyGenerators;
@@ -89,6 +90,7 @@ public class FlingService {
 
   public FlingDto getByShareId(String shareId) {
     FlingEntity flingEntity = flingRepository.findByShareId(shareId);
+    if(flingEntity == null) { throw new EntityNotFoundException("No entity for shareId="+shareId); }
     return flingMapper.map(flingEntity);
   }
 

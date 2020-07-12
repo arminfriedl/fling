@@ -1,88 +1,59 @@
 import log from 'loglevel';
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {useHistory, useLocation} from 'react-router-dom';
 
-import request, {setAuth} from '../../util/request';
-
-import Error from './Error';
+import {fc, AuthClient} from '../../util/fc';
 
 export default function Login() {
-    const [errors, setErrors] = useState([]);
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const history = useHistory();
-    const location = useLocation();
-    const { from } = location.state || { from: { pathname: "/admin" } };
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const history = useHistory();
+  const location = useLocation();
+  const { from } = location.state || { from: { pathname: "/admin" } };
 
-    useEffect(() => setAuth(null), []);
-
-    return (
-        <div className="container-center">
-          <div>
-            <Error errors={errors} clearErrors={clearErrors} >
-              <form className="login-form" onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="username">Username</label>
-                  <input className="form-input" id="username" name="username" type="text" placeholder="Username"
-                         value={username} onChange={handleChange} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="password">Password</label>
-                  <input className="form-input" id="password" name="password" type="password" placeholder={"*".repeat(18)}
-                         value={password} onChange={handleChange} />
-                </div>
-               <div className="login-action-row">
-                 <div className="form-group">
-                   <label className="form-switch input-sm">
-                     <input type="checkbox" />
-                     <i className="form-icon" /> Remember me
-                   </label>
-                 </div>
-                 <button className="btn btn-primary" type="submit">Sign In</button>
-                </div>
-              </form>
-            </Error>
-
-            <p className="login-footer">Ready. Set. Fling.</p>
+  return (
+    <div className="container-center">
+      <div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label" htmlFor="username">Username</label>
+            <input className="form-input" id="username" name="username" type="text" placeholder="Username"
+                   value={username} onChange={ev => setUsername(ev.currentTarget.value)} />
           </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="password">Password</label>
+            <input className="form-input" id="password" name="password" type="password" placeholder={"*".repeat(18)}
+                   value={password} onChange={ev => setPassword(ev.currentTarget.value)} />
+          </div>
+          <div className="login-action-row">
+            <div className="form-group">
+              <label className="form-switch input-sm">
+                <input type="checkbox" />
+                <i className="form-icon" /> Remember me
+              </label>
+            </div>
+            <button className="btn btn-primary" type="submit">Sign In</button>
+          </div>
+        </form>
 
-        </div>
-    );
+        <p className="login-footer">Ready. Set. Fling.</p>
+      </div>
 
-    function handleSubmit(ev) {
-        ev.preventDefault();
+    </div>
+  );
 
-        request.post("/auth/owner", {'username': username, 'password': password})
-            .then(response => {
-                log.info("Logged in successfully");
-                setAuth(response.data);
-                history.replace(from);
-            })
-            .catch(error => {
-                log.error(error);
-                let response = error.response;
-                response.data && response.data.message && setErrors( prev => [response.data.message, ...prev] );
-            });
-    };
+  function handleSubmit(ev) {
+    ev.preventDefault();
 
-    function handleChange(ev) {
-        let name = ev.target.name;
-        let val = ev.target.value;
+    let authClient = new AuthClient();
+    let opt = {adminAuth: new fc.AdminAuth(username, password)};
 
-        switch(name) {
-        case "username":
-            setUsername(val);
-            break;
-        case "password":
-            setPassword(val);
-            break;
-        default:
-            log.error(`Cannot handle change ${name}`);
-            break;
-        }
-    };
-
-    function clearErrors() {
-        setErrors([]);
-    }
+    authClient.authenticateOwner(opt)
+      .then(response => {
+        log.info("Login successful");
+        sessionStorage.setItem['token'] = response;
+        log.info("Returning back to", from);
+        history.replace(from);
+      }).catch(log.error);
+  };
 }
