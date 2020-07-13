@@ -51,8 +51,8 @@ export default function Login() {
     authClient.authenticateOwner(opt)
       .then(response => {
         log.info("Login successful");
-        sessionStorage.setItem['token'] = response;
-        log.info("Returning back to", from);
+        sessionStorage.setItem('token', response);
+        log.debug("Returning back to", from);
         history.replace(from);
       }).catch(log.error);
   };

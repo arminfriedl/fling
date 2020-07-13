@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.friedl.fling.model.dto.ArtifactDto;
 import net.friedl.fling.service.ArtifactService;
@@ -28,6 +29,7 @@ import net.friedl.fling.service.archive.ArchiveService;
 @RestController
 @RequestMapping("/api/artifacts")
 @Tag(name = "artifact", description = "Operations on /api/artifacts")
+@SecurityRequirement(name = "bearer")
 @Validated
 public class ArtifactController {
 

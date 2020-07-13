@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.friedl.fling.model.dto.ArtifactDto;
 import net.friedl.fling.model.dto.FlingDto;
@@ -32,6 +33,7 @@ import net.friedl.fling.service.archive.ArchiveService;
 @RestController
 @RequestMapping("/api/fling")
 @Tag(name = "fling", description = "Operations on /api/fling")
+@SecurityRequirement(name = "bearer")
 public class FlingController {
 
   private FlingService flingService;
