@@ -41,8 +41,22 @@ steps:
   - openapi-generator generate
       -i http://runservice:8080/v3/api-docs
       -g python
+      --additional-properties packageName=flingclient
       -o flingclient.py
       --enable-post-process-file
+  - cd flingclient.py
+  - |+
+    cat << EOF
+    [distutils]
+    index-servers =
+    nexus
+    [private-repository]
+    repository = <private-repository URL>
+    username = <private-repository username>
+    password = <private-repository password>
+    EOF >> .pypirc
+  - cat .pypirc
+  - cd ..
   # JavaScript client
   - openapi-generator generate
       -i http://runservice:8080/v3/api-docs

@@ -16,16 +16,16 @@ function TileAction(props) {
           <ul className="menu text-left">
             <li className="menu-item input-group">
               <div className="input-group">
-                <input type="text" ref={shareUrlRef} className="form-input input-sm input-share-id" readOnly value={props.fling.sharing.shareUrl} />
+                <input type="text" ref={shareUrlRef} className="form-input input-sm input-share-id" readOnly value={props.fling.shareId} />
                 <span className="input-group-addon addon-sm input-group-addon-sm" onClick={copyShareUrl} ><i className="icon icon-copy" /></span>
               </div>
             </li>
             <li className="menu-item">
               <div className="form-group">
                 <label className="form-switch">
-                  <input type="checkbox" checked={props.fling.sharing.shared} onChange={toggleShared} />
+                  <input type="checkbox" checked={props.fling.shared} onChange={toggleShared} />
                   <i className="form-icon" />
-                  {props.fling.sharing.shared ? "Shared":"Private"}
+                  {props.fling.shared ? "Shared":"Private"}
                 </label>
               </div>
             </li>
@@ -57,7 +57,7 @@ function TileAction(props) {
     }
 
     async function toggleShared() {
-        await flingClient.putFling(props.fling.id, {"sharing": {"shared": !props.fling.sharing.shared}});
+        await flingClient.putFling(props.fling.id, {"sharing": {"shared": !props.fling.shared}});
         await props.refreshFlingListFn();
     }
 }

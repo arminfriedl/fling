@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Schema(name = "Fling")
 public class FlingDto {
   @Schema(accessMode = AccessMode.READ_ONLY, type = "string")
-  @NotNull
   private UUID id;
 
   @Schema(description = "Name of the fling")
@@ -26,7 +25,6 @@ public class FlingDto {
 
   @Schema(type = "integer", format = "int64", accessMode = AccessMode.READ_ONLY,
       description = "Creation time in milliseconds since the unix epoch 01.01.1970 00:00:00 UTC")
-  @NotNull
   private Instant creationTime;
 
   @Schema(description = "Share id of the fling. Used in the share link.")

@@ -22,7 +22,7 @@ public class FlingDtoTest {
   private Validator validator;
 
   @Test
-  void testSetId_null_validationFails() {
+  void testSetId_null_validationOk() {
     FlingDto flingDto = FlingDto.builder()
         .id(null)
         .name("test")
@@ -33,10 +33,7 @@ public class FlingDtoTest {
 
     Set<ConstraintViolation<FlingDto>> constraintViolations = validator.validate(flingDto);
 
-    assertThat(constraintViolations).hasSize(1);
-    ConstraintViolation<FlingDto> violation = constraintViolations.iterator().next();
-    assertThat(violation.getPropertyPath().toString()).isEqualTo("id");
-    assertThat(violation.getMessage()).isEqualTo("must not be null");
+    assertThat(constraintViolations).hasSize(0);
   }
 
   @Test
@@ -58,7 +55,7 @@ public class FlingDtoTest {
   }
 
   @Test
-  void testSetCreationTime_null_validationFails() {
+  void testSetCreationTime_null_validationOk() {
     FlingDto flingDto = FlingDto.builder()
         .id(new UUID(0L, 0L))
         .name("test")
@@ -69,10 +66,7 @@ public class FlingDtoTest {
 
     Set<ConstraintViolation<FlingDto>> constraintViolations = validator.validate(flingDto);
 
-    assertThat(constraintViolations).hasSize(1);
-    ConstraintViolation<FlingDto> violation = constraintViolations.iterator().next();
-    assertThat(violation.getPropertyPath().toString()).isEqualTo("creationTime");
-    assertThat(violation.getMessage()).isEqualTo("must not be null");
+    assertThat(constraintViolations).hasSize(0);
   }
 
 

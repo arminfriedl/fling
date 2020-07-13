@@ -22,7 +22,7 @@ public class ArtifactDtoTest {
   private Validator validator;
 
   @Test
-  void testSetId_null_validationFails() {
+  void testSetId_null_validationOk() {
     ArtifactDto artifactDto = ArtifactDto.builder()
         .id(null)
         .path(Paths.get("test"))
@@ -31,10 +31,7 @@ public class ArtifactDtoTest {
 
     Set<ConstraintViolation<ArtifactDto>> constraintViolations = validator.validate(artifactDto);
 
-    assertThat(constraintViolations).hasSize(1);
-    ConstraintViolation<ArtifactDto> violation = constraintViolations.iterator().next();
-    assertThat(violation.getPropertyPath().toString()).isEqualTo("id");
-    assertThat(violation.getMessage()).isEqualTo("must not be null");
+    assertThat(constraintViolations).hasSize(0);
   }
 
   @Test

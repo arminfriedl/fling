@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 @Schema(name = "Artifact")
 public class ArtifactDto {
   @Schema(accessMode = AccessMode.READ_ONLY, type = "string")
-  @NotNull
   private UUID id;
 
   @Schema(type = "string",
