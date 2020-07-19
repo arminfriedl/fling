@@ -1,0 +1,39 @@
+######################################
+# Fling Querysheet for restclient.el #
+######################################
+
+# Authenticate as user
+POST http://localhost:8080/api/auth/user
+{"shareId": "shareId", "authCode":"secret"}
+-> jq-set-var :token .
+
+# :token = Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTQ0NjEzNzMsImV4cCI6MTU5NDY0MTM3Mywic3ViIjoiYWRtaW4ifQ.yu6sF1aE6sW4Jx1hBMj6iUsy8xfiaRGlIFVnHK4YkU8
+
+# Authenticate as admin
+POST http://localhost:8080/api/auth/admin
+Content-Type: application/json
+{"adminName": "admin", "adminPassword":"123"}
+-> run-hook (restclient-set-var ":token" (buffer-substring-no-properties 1 (line-end-position)))
+
+# Get all flings
+GET http://localhost:8080/api/fling
+Authorization: Bearer :token
+
+#
+:flingId = dfc208a3-5924-43b4-aa6a-c263541dca5e
+
+# Get one fling
+GET http://localhost:8080/api/fling/:flingId
+:token
+
+# Get all artifacts
+GET http://localhost:8080/api/fling/:flingId/artifacts
+:token
+
+#
+GET https://httpbin.org/json
+-> jq-set-var :my-var .slideshow.slides[0].title
+
+#
+GET http://httpbin.org/ip
+-> run-hook (restclient-set-var ":my-ip" (cdr (assq 'origin (json-read))))

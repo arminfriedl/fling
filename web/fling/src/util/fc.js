@@ -1,5 +1,12 @@
+/*
+ * Shim for the fling API which sets a bearer token for every request
+ */
 import * as fc from '@fling/flingclient';
 
+/*
+ * Construct a client configuration with either the given token, or, if token is
+ * undefined or null, token retrieved from the session storage.
+ */
 let clientConfig = (token) => {
   let config = new fc.ApiClient();
   config.basePath = process.env.REACT_APP_API.replace(/\/+$/, '');

@@ -13,7 +13,6 @@ export default function LandingPage() {
 
     function openFling(ev) {
         ev.preventDefault();
-
         window.location = `/f/${shareId}`;
     }
 
