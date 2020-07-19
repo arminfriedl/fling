@@ -45,17 +45,6 @@ steps:
       -o flingclient.py
       --enable-post-process-file
   - cd flingclient.py
-  - |+
-    cat << EOF
-    [distutils]
-    index-servers =
-    nexus
-    [private-repository]
-    repository = <private-repository URL>
-    username = <private-repository username>
-    password = <private-repository password>
-    EOF >> .pypirc
-  - cat .pypirc
   - cd ..
   # JavaScript client
   - openapi-generator generate
