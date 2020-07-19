@@ -24,15 +24,14 @@ function setActiveFlingAction(fling) {
     }
 }
 
-
 function setActiveFling(id) {
     return (dispatch, getState) => {
         if (!id) {
             log.debug(`Not setting active Fling. No id given.`);
-            return;
+            return false;
         }
         const { flings: { flings } } = getState();
-        let foundFling = flings.find(f => f.id === id);
+        const foundFling = flings.find(f => f.id === id);
 
         if (foundFling) {
             log.info(`Found active fling ${id} in local storage`);
@@ -48,7 +47,7 @@ function setActiveFling(id) {
                     dispatch(setActiveFlingAction(fling))
                 })
                 .catch(error => {
-                    log.warn(`Could not find active fling. ` +
+                    log.warn(`Could not find active fling: ${error} \n` +
                         `Resetting active fling`);
                     dispatch(setActiveFlingAction(undefined));
                 })
@@ -57,11 +56,34 @@ function setActiveFling(id) {
 }
 
 function retrieveFlings() {
-    return (dispatch) => {
-        let flingClient = new FlingClient();
+    return (dispatch, getState) => {
+        const { flings: { activeFling } } = getState();
+        const flingClient = new FlingClient();
+
         flingClient.getFlings()
-            .then(flings => dispatch(setFlingsAction(flings)));
+            .then(flings => {
+                dispatch(setFlingsAction(flings));
+                if (activeFling) {
+                    dispatch(setActiveFling(activeFling.id));
+                }
+            });
     }
 }
 
-export { retrieveFlings, setActiveFling };
+function deleteFling(id) {
+    return (dispatch, getState) => {
+        if (!id) {
+            log.debug(`Not deleting Fling. No id given.`);
+            return;
+        }
+
+        const flingClient = new FlingClient();
+
+        flingClient.deleteFling(id)
+            .then(() => dispatch(retrieveFlings()))
+            .catch(error =>
+                log.error(`Could not delete fling ${id}: ${error}`));
+    }
+}
+
+export { retrieveFlings, setActiveFling, deleteFling };

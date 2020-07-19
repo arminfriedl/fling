@@ -3,10 +3,26 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import { NavLink } from "react-router-dom";
 
-import { flingClient } from '../../util/flingclient';
+import { useSelector, useDispatch } from "react-redux";
+
+import { deleteFling } from "../../redux/actions";
 
 function TileAction(props) {
   let shareUrlRef = useRef(null);
+  const dispatch = useDispatch();
+
+  function copyShareUrl() {
+    shareUrlRef.current.focus();
+    shareUrlRef.current.select();
+
+    try {
+      let successful = document.execCommand('copy');
+      let msg = successful ? 'successful' : 'unsuccessful';
+      console.log('Copying to clipoard ' + msg);
+    } catch (err) {
+      log.error("Couldn't copy to clipboard: ", err);
+    }
+  }
 
   return (
     <div className="tile-action dropdown">
@@ -27,8 +43,7 @@ function TileAction(props) {
         <li className="menu-item">
           <div className="form-group">
             <label className="form-switch">
-              <input type="checkbox"
-                checked={props.fling.shared} onChange={toggleShared} />
+              <input type="checkbox" checked={props.fling.shared} />
               <i className="form-icon" />
               {props.fling.shared ? "Shared" : "Private"}
             </label>
@@ -36,7 +51,7 @@ function TileAction(props) {
         </li>
         <li className="menu-item">
           <button className="btn btn-link text-warning pl-0"
-            onClick={deleteFling}>
+            onClick={ev => dispatch(deleteFling(props.fling.id))}>
             <i className="icon icon-delete mr-1" /> Remove
           </button>
         </li>
@@ -44,34 +59,14 @@ function TileAction(props) {
     </div>
   );
 
-  function copyShareUrl() {
-    shareUrlRef.current.focus();
-    shareUrlRef.current.select();
-
-    try {
-      let successful = document.execCommand('copy');
-      let msg = successful ? 'successful' : 'unsuccessful';
-      console.log('Copying to clipoard ' + msg);
-    } catch (err) {
-      log.error("Couldn't copy to clipboard: ", err);
-    }
-  }
-
-  async function deleteFling() {
-    await flingClient.deleteFling(props.fling.id);
-    await props.refreshFlingListFn();
-  }
-
-  async function toggleShared() {
-    await flingClient.putFling(props.fling.id, { "sharing": { "shared": !props.fling.shared } });
-    await props.refreshFlingListFn();
-  }
 }
 
 export default function FlingTile(props) {
+  const activeFling = useSelector((state) => state.flings.activeFling);
+
   let tileClasses = classNames(
     "tile", "tile-centered", "p-2", "c-hand",
-    { "active": props.activeFling === props.fling.id }
+    { "active": activeFling ? activeFling.id === props.fling.id : false }
   );
 
   return (
@@ -81,11 +76,13 @@ export default function FlingTile(props) {
           <NavLink to={`/admin/${props.fling.id}`}>
             <div className="tile-title">{props.fling.name}</div>
             <small className="tile-subtitle text-gray">
-              14MB · Public · 1 Jan, 2017
+              {`${props.fling.shared ? "Shared" : "Private"}` +
+                ` · ${(new Date(props.fling.creationTime)).toLocaleDateString()}` +
+                ` · ${props.fling.authCode ? "Protected" : "Unprotected"}`}
             </small>
           </NavLink>
         </div>
-        <TileAction fling={props.fling} refreshFlingListFn={props.refreshFlingListFn} />
+        <TileAction fling={props.fling} />
       </div>
     </div>
   );

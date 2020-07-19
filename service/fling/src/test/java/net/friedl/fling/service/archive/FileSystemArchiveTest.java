@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import java.io.File;
@@ -216,6 +217,14 @@ public class FileSystemArchiveTest {
 
     assertThat(Files.exists(tempDir.resolve(artifactEntity1.getFling().getId() + ".zip")),
         equalTo(false));
+  }
+
+  @Test
+  public void deleteFling_zipDiskNotFound_noThrow() throws IOException {
+    assertThat(Files.exists(tempDir.resolve(artifactEntity2.getFling().getId() + ".zip")),
+        equalTo(false));
+
+    assertDoesNotThrow(() -> fileSystemArchive.deleteFling(artifactEntity2.getFling().getId()));
   }
 
   private void repopulateArchivePath() throws IOException, URISyntaxException {

@@ -1,3 +1,4 @@
+import log from "loglevel";
 import produce from "immer";
 
 import { SET_FLINGS, SET_ACTIVE_FLING, ADD_FLING } from "../actionTypes";
@@ -16,7 +17,19 @@ export default produce((draft, action) => {
             draft.flings = action.payload;
             break;
         case ADD_FLING:
-            draft.flings.push(action.payload);
+            // Check storage again here, otherwise there could be a race
+            // condition due to async calls of SET_FLINGS and ADD_FLING
+            let foundFlingIdx = draft.flings.findIndex(fling =>
+                fling.id === action.payload.id);
+
+            if (foundFlingIdx === -1) {
+                log.debug(`Adding new fling with id ${action.payload.id}`)
+                draft.flings.push(action.payload);
+            } else {
+                log.debug(`Fling already exists. ` +
+                    `Updating fling with id ${action.payload.id}`)
+                draft.flings[foundFlingIdx] = action.payload
+            }
             break;
         case SET_ACTIVE_FLING:
             draft.activeFling = action.payload;

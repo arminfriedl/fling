@@ -129,7 +129,11 @@ public class FileSystemArchive implements ArchiveService {
 
       Path zipDiskPath = archivePath.resolve(flingId.toString() + ".zip");
       log.debug("Deleting fling [.id={}] at {}", flingId, zipDiskPath);
-      Files.delete(zipDiskPath);
+      if(Files.exists(zipDiskPath)) {
+        Files.delete(zipDiskPath);
+      } else {
+        log.warn("No fling disk found at {}", zipDiskPath);
+      }
 
       artifactRepository.findAllByFlingId(flingId).forEach(ar -> ar.setArchived(false));
     }

@@ -18,7 +18,7 @@ export default function FlingAdmin() {
 
   useEffect(() => {
     if (flingId) {
-      dispatch(setActiveFling(flingId))
+      dispatch(setActiveFling(flingId));
     }
   }, [flingId, dispatch]);
 
