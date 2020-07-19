@@ -69,6 +69,11 @@ public class AuthorizationService {
   }
 
   public boolean allowFlingAccessByShareId(String shareId, AbstractAuthenticationToken token) {
+    if (FlingAuthorities.FLING_ADMIN.verify(token)) {
+      log.debug("Owner authorized for fling access [shareId = {}]", shareId);
+      return true;
+    }
+
     FlingEntity flingEntity = flingRepository.findByShareId(shareId);
     if(flingEntity == null) { throw new EntityNotFoundException("No entity for shareId="+shareId); }
     return allowFlingAccess(flingEntity.getId(), token);

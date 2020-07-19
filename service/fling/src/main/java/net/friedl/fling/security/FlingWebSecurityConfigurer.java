@@ -78,14 +78,14 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         /** Authorization for: /api/fling **/
         /***********************************/
         .authorizeRequests()
-          .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/**")
-          .access("@authorizationService.allowFlingAccess(#flingId, authentication)")
-        .and()
-        .authorizeRequests()
           .antMatchers(HttpMethod.GET, "/api/fling/share/{shareId}")
           .access("@authorizationService.allowFlingAccessByShareId(#shareId, authentication)")
         .and()
         .authorizeRequests()
+          .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/**")
+          .access("@authorizationService.allowFlingAccess(#flingId, authentication)")
+        .and()
+       .authorizeRequests()
           .antMatchers(HttpMethod.POST, "/api/fling/{flingId}/artifact")
           .access("@authorizationService.allowUpload(#flingId, authentication)")
         .and()
