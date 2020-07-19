@@ -56,7 +56,8 @@ public class ArtifactService {
    */
   public ArtifactDto create(UUID flingId, ArtifactDto artifactDto) {
     FlingEntity flingEntity = flingRepository.getOne(flingId);
-
+    
+    log.debug("Creating new ArtifactEntity for ArtifactDto[.path={}]", artifactDto.getPath());
     ArtifactEntity artifactEntity = artifactMapper.map(artifactDto);
     artifactEntity.setFling(flingEntity);
     artifactEntity = artifactRepository.save(artifactEntity);

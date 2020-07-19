@@ -1,5 +1,5 @@
 import log from 'loglevel';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useHistory, useLocation} from 'react-router-dom';
 
 import {fc, AuthClient} from '../../util/fc';
@@ -10,6 +10,25 @@ export default function Login() {
   const history = useHistory();
   const location = useLocation();
   const { from } = location.state || { from: { pathname: "/admin" } };
+
+  useEffect(() => {
+    sessionStorage.removeItem("token")
+  });
+
+  function handleSubmit(ev) {
+    ev.preventDefault();
+
+    let authClient = new AuthClient();
+    let opt = {adminAuth: new fc.AdminAuth(username, password)};
+
+    authClient.authenticateOwner(opt)
+      .then(response => {
+        log.info("Login successful");
+        sessionStorage.setItem('token', response);
+        log.debug("Returning back to", from);
+        history.replace(from);
+      }).catch(log.error);
+  };
 
   return (
     <div className="container-center">
@@ -41,19 +60,4 @@ export default function Login() {
 
     </div>
   );
-
-  function handleSubmit(ev) {
-    ev.preventDefault();
-
-    let authClient = new AuthClient();
-    let opt = {adminAuth: new fc.AdminAuth(username, password)};
-
-    authClient.authenticateOwner(opt)
-      .then(response => {
-        log.info("Login successful");
-        sessionStorage.setItem('token', response);
-        log.debug("Returning back to", from);
-        history.replace(from);
-      }).catch(log.error);
-  };
 }

@@ -11,6 +11,6 @@ public interface FlingRepository extends JpaRepository<FlingEntity, UUID> {
 
   FlingEntity findByShareId(String shareId);
 
-  @Query("SELECT fe FROM FlingEntity fe JOIN ArtifactEntity ae ON fe.id=ae.id WHERE ae.id=:artifactId")
+  @Query("SELECT fe FROM FlingEntity fe JOIN ArtifactEntity ae ON fe.id=ae.fling.id WHERE ae.id=:artifactId")
   FlingEntity findByArtifactId(UUID artifactId);
 }

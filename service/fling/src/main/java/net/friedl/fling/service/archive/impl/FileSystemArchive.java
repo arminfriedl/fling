@@ -89,14 +89,16 @@ public class FileSystemArchive implements ArchiveService {
   public void storeArtifact(UUID artifactId, InputStream artifactStream) throws IOException {
     log.debug("Storing artifact {}", artifactId);
 
-    setArchived(artifactId, false);
-    FileSystem zipDisk = getZipDisk(artifactId);
-    Files.copy(artifactStream, getZipDiskPath(artifactId, zipDisk),
-        StandardCopyOption.REPLACE_EXISTING);
+    synchronized (filesystems) {
+      setArchived(artifactId, false);
+      FileSystem zipDisk = getZipDisk(artifactId);
+      Files.copy(artifactStream, getZipDiskPath(artifactId, zipDisk),
+          StandardCopyOption.REPLACE_EXISTING);
 
-    // we need to close the zipDisk in order to flush it to disk
-    closeZipDisk(artifactId);
-    setArchived(artifactId, true);
+      // we need to close the zipDisk in order to flush it to disk
+      closeZipDisk(artifactId);
+      setArchived(artifactId, true);
+    }
   }
 
   @Override
@@ -129,7 +131,7 @@ public class FileSystemArchive implements ArchiveService {
 
       Path zipDiskPath = archivePath.resolve(flingId.toString() + ".zip");
       log.debug("Deleting fling [.id={}] at {}", flingId, zipDiskPath);
-      if(Files.exists(zipDiskPath)) {
+      if (Files.exists(zipDiskPath)) {
         Files.delete(zipDiskPath);
       } else {
         log.warn("No fling disk found at {}", zipDiskPath);
@@ -142,7 +144,6 @@ public class FileSystemArchive implements ArchiveService {
   private void setArchived(UUID artifactId, boolean archived) {
     ArtifactEntity artifactEntity = artifactRepository.getOne(artifactId);
     artifactEntity.setArchived(archived);
-
     log.debug("Artifact[.id={}] set to {} archived", artifactId, archived ? "" : "not");
   }
 

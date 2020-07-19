@@ -43,7 +43,7 @@ function TileAction(props) {
         <li className="menu-item">
           <div className="form-group">
             <label className="form-switch">
-              <input type="checkbox" checked={props.fling.shared} />
+              <input type="checkbox" disabled checked={props.fling.shared} />
               <i className="form-icon" />
               {props.fling.shared ? "Shared" : "Private"}
             </label>

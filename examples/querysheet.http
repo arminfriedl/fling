@@ -27,6 +27,12 @@ Content-Type: application/json
 POST http://localhost:8080/api/fling
 Content-Type: application/json
 :token
+{"name": "Shared Fling from querysheet", "expirationClicks": 12, "shared": true}
+
+# Add a new fling
+POST http://localhost:8080/api/fling
+Content-Type: application/json
+:token
 {"name": "Unshared Fling from querysheet", "expirationClicks": 12, "shared": false}
 
 # Add a new fling

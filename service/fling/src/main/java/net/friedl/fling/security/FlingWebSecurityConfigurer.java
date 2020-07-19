@@ -109,15 +109,15 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         /***************************************/
         .authorizeRequests()
           .antMatchers(HttpMethod.GET, "/api/artifacts/{artifactId}/**")
-          .access("@authorizationService.allowArtifactAccess(#artifactId, token)")
+          .access("@authorizationService.allowArtifactAccess(#artifactId, authentication)")
         .and()
         .authorizeRequests()
           .antMatchers(HttpMethod.POST, "/api/artifacts/{artifactId}/data")
-          .access("@authorizationService.allowArtifactUpload(#artifactId, token)")
+          .access("@authorizationService.allowArtifactUpload(#artifactId, authentication)")
         .and()
         .authorizeRequests()
           .antMatchers(HttpMethod.DELETE, "/api/artifacts/{artifactId}")
-          .access("@authorizationService.allowArtifactUpload(#artifactId, token)");
+          .access("@authorizationService.allowArtifactUpload(#artifactId, authentication)");
 
         //@formatter:on
   }
