@@ -84,4 +84,5 @@ public class AuthenticationControllerTest {
         .andExpect(status().is(200))
         .andExpect(content().string("token"));
   }
+
 }

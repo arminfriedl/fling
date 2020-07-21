@@ -1,4 +1,4 @@
-package net.friedl.fling.security.authentication;
+package net.friedl.fling.security.authentication.authorities;
 
 import org.springframework.security.core.GrantedAuthority;
 import net.friedl.fling.security.FlingAuthorities;

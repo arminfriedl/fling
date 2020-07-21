@@ -1,6 +1,7 @@
 package net.friedl.fling.security;
 
 import static net.friedl.fling.security.FlingAuthorities.FLING_ADMIN;
+import static net.friedl.fling.security.FlingAuthorities.FLING_USER;
 import static org.springframework.security.config.Customizer.withDefaults;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.friedl.fling.FlingSecurityConfiguration;
-import net.friedl.fling.security.authentication.JwtAuthenticationFilter;
+import net.friedl.fling.security.authentication.filter.BearerAuthenticationFilter;
+import net.friedl.fling.security.authentication.filter.TokenAuthenticationFilter;
 import net.friedl.fling.service.AuthorizationService;
 
 @Slf4j
@@ -30,15 +31,18 @@ import net.friedl.fling.service.AuthorizationService;
 public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
   private List<String> allowedOrigins;
 
-  private JwtAuthenticationFilter jwtAuthenticationFilter;
+  private TokenAuthenticationFilter tokenAuthenticationFilter;
+  private BearerAuthenticationFilter bearerAuthenticationFilter;
   private AuthorizationService authorizationService;
 
   @Autowired
-  public FlingWebSecurityConfigurer(JwtAuthenticationFilter jwtAuthenticationFilter,
-      AuthorizationService authorizationService,
-      FlingSecurityConfiguration securityConfiguraiton) {
+  public FlingWebSecurityConfigurer(
+      TokenAuthenticationFilter tokenAuthenticationFilter,
+      BearerAuthenticationFilter bearerAuthenticationFilter,
+      AuthorizationService authorizationService) {
 
-    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.tokenAuthenticationFilter = tokenAuthenticationFilter;
+    this.bearerAuthenticationFilter = bearerAuthenticationFilter;
     this.authorizationService = authorizationService;
   }
 
@@ -52,7 +56,8 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         /**********************************************/
         /** Authentication Interceptor Configuration **/
         /**********************************************/
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(bearerAuthenticationFilter, TokenAuthenticationFilter.class)
         // Do not keep authorization token in session. This would interfere with bearer authentication
         // in that it is possible to authenticate without a bearer token if the session is kept.
         // Turn off this confusing and non-obvious behavior.
@@ -68,6 +73,10 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         /**********************************/
         /** Authorization for: /api/auth **/
         /**********************************/
+        .authorizeRequests()
+            .antMatchers("/api/auth/derive")
+            .hasAnyAuthority(FLING_ADMIN.getAuthority(), FLING_USER.getAuthority())
+        .and()
         .authorizeRequests()
             .antMatchers("/api/auth/**")
             .permitAll()

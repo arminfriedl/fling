@@ -75,7 +75,9 @@ public class AuthorizationService {
     }
 
     FlingEntity flingEntity = flingRepository.findByShareId(shareId);
-    if(flingEntity == null) { throw new EntityNotFoundException("No entity for shareId="+shareId); }
+    if (flingEntity == null) {
+      throw new EntityNotFoundException("No entity for shareId=" + shareId);
+    }
     return allowFlingAccess(flingEntity.getId(), token);
   }
 

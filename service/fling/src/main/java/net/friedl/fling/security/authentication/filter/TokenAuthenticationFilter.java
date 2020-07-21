@@ -1,4 +1,4 @@
-package net.friedl.fling.security.authentication;
+package net.friedl.fling.security.authentication.filter;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -13,48 +13,47 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import lombok.extern.slf4j.Slf4j;
+import net.friedl.fling.security.authentication.FlingToken;
 import net.friedl.fling.service.AuthenticationService;
 
 @Slf4j
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
-  private static final String TOKEN_PREFIX = "Bearer ";
-  private static final String HEADER_STRING = "Authorization";
-
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
   private AuthenticationService authenticationService;
 
   @Autowired
-  public JwtAuthenticationFilter(AuthenticationService authenticationService) {
+  public TokenAuthenticationFilter(AuthenticationService authenticationService) {
     this.authenticationService = authenticationService;
   }
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain)
-      throws ServletException, IOException {
+      FilterChain filterChain) throws ServletException, IOException {
 
-    String header = request.getHeader(HEADER_STRING);
+    String derivedToken = request.getParameter("derivedtoken");
+    if (derivedToken == null) {
+      log.info("No derived token in request for {} {}{}", request.getMethod(),
+          request.getRequestURL(),
+          request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
-    if (header == null || !header.startsWith(TOKEN_PREFIX)) {
-      log.info("Anonymous request for {} {}{}", request.getMethod(), request.getRequestURL(),
-          request.getQueryString() != null ? "?"+request.getQueryString(): "");
       filterChain.doFilter(request, response);
       return;
     }
 
-    String authToken = header.replace(TOKEN_PREFIX, "");
-
     SecurityContext securityContext = SecurityContextHolder.getContext();
-
     if (securityContext.getAuthentication() == null) {
       log.info("Authenticating request for {} {}{}", request.getMethod(), request.getRequestURL(),
-          request.getQueryString() != null ? "?"+request.getQueryString(): "");
-      FlingToken token = authenticationService.parseAuthentication(authToken);
+          request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
+      FlingToken token = authenticationService.parseDerivedToken(derivedToken);
+
       log.info("Authenticated as {}", token.getAuthorities().stream()
           .map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+
       securityContext.setAuthentication(token);
     }
 
     filterChain.doFilter(request, response);
   }
+
 }

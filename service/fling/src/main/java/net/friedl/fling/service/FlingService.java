@@ -90,7 +90,9 @@ public class FlingService {
 
   public FlingDto getByShareId(String shareId) {
     FlingEntity flingEntity = flingRepository.findByShareId(shareId);
-    if(flingEntity == null) { throw new EntityNotFoundException("No entity for shareId="+shareId); }
+    if (flingEntity == null) {
+      throw new EntityNotFoundException("No entity for shareId=" + shareId);
+    }
     return flingMapper.map(flingEntity);
   }
 

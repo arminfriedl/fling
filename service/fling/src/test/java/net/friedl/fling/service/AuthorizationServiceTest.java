@@ -19,9 +19,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.FlingRepository;
-import net.friedl.fling.security.authentication.FlingAdminAuthority;
 import net.friedl.fling.security.authentication.FlingToken;
-import net.friedl.fling.security.authentication.FlingUserAuthority;
+import net.friedl.fling.security.authentication.authorities.FlingAdminAuthority;
+import net.friedl.fling.security.authentication.authorities.FlingUserAuthority;
 
 @ExtendWith(SpringExtension.class)
 public class AuthorizationServiceTest {
@@ -50,7 +50,7 @@ public class AuthorizationServiceTest {
 
   @Test
   public void allowUpload_flingAdmin_true() {
-    FlingToken flingToken = new FlingToken(new FlingAdminAuthority(), "jwtToken");
+    FlingToken flingToken = new FlingToken(List.of(new FlingAdminAuthority()), "jwtToken");
     assertTrue(authorizationService.allowUpload(UUID.randomUUID(), flingToken));
   }
 
@@ -59,7 +59,8 @@ public class AuthorizationServiceTest {
     FlingEntity flingEntity = new FlingEntity();
     flingEntity.setAllowUpload(false);
 
-    FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
+    FlingToken flingToken =
+        new FlingToken(List.of(new FlingUserAuthority(new UUID(0, 0))), "jwtToken");
 
     when(flingRepository.getOne(new UUID(0, 0))).thenReturn(flingEntity);
 
@@ -71,7 +72,8 @@ public class AuthorizationServiceTest {
     FlingEntity flingEntity = new FlingEntity();
     flingEntity.setAllowUpload(true);
 
-    FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
+    FlingToken flingToken =
+        new FlingToken(List.of(new FlingUserAuthority(new UUID(0, 0))), "jwtToken");
 
     when(flingRepository.getOne(new UUID(1, 1))).thenReturn(flingEntity);
 
@@ -84,7 +86,8 @@ public class AuthorizationServiceTest {
     FlingEntity flingEntity = new FlingEntity();
     flingEntity.setAllowUpload(true);
 
-    FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
+    FlingToken flingToken =
+        new FlingToken(List.of(new FlingUserAuthority(new UUID(0, 0))), "jwtToken");
 
     when(flingRepository.getOne(new UUID(0, 0))).thenReturn(flingEntity);
 
@@ -101,25 +104,28 @@ public class AuthorizationServiceTest {
 
   @Test
   public void allowFlingAcess_flingAdmin_true() {
-    FlingToken flingToken = new FlingToken(new FlingAdminAuthority(), "jwtToken");
+    FlingToken flingToken = new FlingToken(List.of(new FlingAdminAuthority()), "jwtToken");
     assertTrue(authorizationService.allowFlingAccess(UUID.randomUUID(), flingToken));
   }
 
   @Test
   public void allowFlingAcess_flingUser_notAuthorizedForId_false() {
-    FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
+    FlingToken flingToken =
+        new FlingToken(List.of(new FlingUserAuthority(new UUID(0, 0))), "jwtToken");
     assertFalse(authorizationService.allowFlingAccess(new UUID(1, 1), flingToken));
   }
 
   @Test
   public void allowFlingAcess_flingUser_authorizedForId_true() {
-    FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
+    FlingToken flingToken =
+        new FlingToken(List.of(new FlingUserAuthority(new UUID(0, 0))), "jwtToken");
     assertTrue(authorizationService.allowFlingAccess(new UUID(0, 0), flingToken));
   }
 
   @Test
   public void allowFlingAccessByShareId_noFlingForShareId_throw() {
-    FlingToken flingToken = new FlingToken(new FlingUserAuthority(new UUID(0, 0)), "jwtToken");
+    FlingToken flingToken =
+        new FlingToken(List.of(new FlingUserAuthority(new UUID(0, 0))), "jwtToken");
     when(flingRepository.findByShareId(any(String.class))).thenReturn(null);
 
     assertThrows(EntityNotFoundException.class,
