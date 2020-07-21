@@ -2,36 +2,31 @@ import log from 'loglevel';
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
-import { ArtifactClient, FlingClient } from '../../util/fc';
+import { ArtifactClient, FlingClient, AuthClient } from '../../util/fc';
 import { prettifyTimestamp } from '../../util/fn';
 
 function FlingArtifactControl(props) {
   let iframeContainer = useRef(null);
   const artifactClient = new ArtifactClient();
+  const authClient = new AuthClient();
 
   function handleDelete(ev) {
     artifactClient.deleteArtifact(props.artifact.id)
       .then(() => props.reloadArtifactsFn());
   }
 
-
   function handleDownload(ev) {
-    artifactClient.downloadArtifactWithHttpInfo(props.artifact.id)
-      .then(response => {
-          log.info(response.headers);
-          var blob = new Blob([response.data], {type: response.type});
-          if(window.navigator.msSaveOrOpenBlob) {
-              window.navigator.msSaveBlob(blob, response.name);
-          }
-          else{
-              var elem = window.document.createElement('a');
-              elem.href = window.URL.createObjectURL(blob);
-              elem.download = response.name;
-              document.body.appendChild(elem);
-              elem.click();
-              document.body.removeChild(elem);
-          }
-      });
+    authClient.deriveToken({ singleUse: true })
+      .then(token => {
+        // We need this iframe hack because with a regular href, while
+        // the browser downloads the file fine, it also reloads the page, hence
+        // loosing all logs and state
+        let frame = document.createElement("iframe");
+        let url = `${process.env.REACT_APP_API.replace(/\/+$/, '')}/api/artifacts/${props.artifact.id}/data?derivedToken=${token}`;
+        log.trace(`Generated download url: ${url}`);
+        frame.src = url;
+        iframeContainer.current.appendChild(frame);
+      })
   }
 
   return (

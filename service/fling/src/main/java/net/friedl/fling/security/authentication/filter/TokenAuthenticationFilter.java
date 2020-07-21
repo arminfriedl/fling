@@ -30,7 +30,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    String derivedToken = request.getParameter("derivedtoken");
+    String derivedToken = request.getParameter("derivedToken");
     if (derivedToken == null) {
       log.info("No derived token in request for {} {}{}", request.getMethod(),
           request.getRequestURL(),

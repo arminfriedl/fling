@@ -52,6 +52,7 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
          http
         .csrf().disable()
         .cors(withDefaults())
+        .headers().frameOptions().disable().and()
         
         /**********************************************/
         /** Authentication Interceptor Configuration **/

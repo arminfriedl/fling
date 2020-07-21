@@ -25,8 +25,8 @@ function ArtifactClient(token) {
   return new fc.ArtifactApi(clientConfig(token));
 }
 
-function AuthClient() {
-  return new fc.AuthApi(clientConfig());
+function AuthClient(token) {
+  return new fc.AuthApi(clientConfig(token));
 }
 
 export {FlingClient, ArtifactClient, AuthClient, fc};
