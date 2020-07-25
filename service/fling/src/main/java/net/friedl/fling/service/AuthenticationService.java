@@ -15,12 +15,14 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.model.dto.AdminAuthDto;
+import net.friedl.fling.model.dto.FlingDto;
 import net.friedl.fling.model.dto.UserAuthDto;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.entities.TokenEntity;
@@ -84,10 +86,14 @@ public class AuthenticationService {
       throw new EntityNotFoundException("No entity for shareId=" + userAuth.getShareId());
     }
 
-    String providedAuthCodeHash = passwordEncoder.encode(userAuth.getAuthCode());
+    String providedAuthCode = userAuth.getAuthCode();
     String actualAuthCodeHash = flingEntity.getAuthCode();
+    
+    Boolean isProtected = StringUtils.hasText(actualAuthCodeHash);
 
-    if (!actualAuthCodeHash.equals(providedAuthCodeHash)) {
+    if(!isProtected) log.debug("No protection set for fling [.shareId={}]");
+
+    if (isProtected && !passwordEncoder.matches(providedAuthCode, actualAuthCodeHash)) {
       log.debug("Authentication failed for fling [.shareId={}]", userAuth.getShareId());
       return Optional.empty();
     }
@@ -96,6 +102,7 @@ public class AuthenticationService {
     return Optional.of(
         getJwtBuilder()
             .setSubject("user")
+            .claim("shareId", flingEntity.getShareId())
             .claim("id", flingEntity.getId())
             .compact());
 

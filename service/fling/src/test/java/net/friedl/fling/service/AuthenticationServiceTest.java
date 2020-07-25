@@ -119,6 +119,16 @@ public class AuthenticationServiceTest {
   }
 
   @Test
+  public void authenticate_authCodeEmpty_ok() {
+    FlingEntity flingEntity = new FlingEntity();
+    UserAuthDto userAuthDto = new UserAuthDto("shareId", "");
+
+    when(flingRepository.findByShareId(any(String.class))).thenReturn(flingEntity);
+
+    assertThat(authenticationService.authenticate(userAuthDto), not(equalTo(Optional.empty())));
+  }
+
+  @Test
   public void authenticate_authCodeEquals_ok() {
     FlingEntity flingEntity = new FlingEntity();
     flingEntity.setAuthCode("authCodeHash");
@@ -130,6 +140,7 @@ public class AuthenticationServiceTest {
 
     when(flingRepository.findByShareId(any(String.class))).thenReturn(flingEntity);
     when(passwordEncoder.encode(any(String.class))).thenReturn("authCodeHash");
+    when(passwordEncoder.matches("authCode", "authCodeHash")).thenReturn(true);
 
     assertThat(authenticationService.authenticate(userAuthDto), not(equalTo(Optional.empty())));
   }

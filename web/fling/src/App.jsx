@@ -87,7 +87,7 @@ function UserRoute({ children, ...rest }) {
 
         let authorized =
           jwt.hasSubject("admin")
-          || ( jwt.hasSubject("user") && jwt.hasClaim("id", state['shareId']) );
+          || ( jwt.hasSubject("user") && jwt.hasClaim("shareId", state['shareId']) );
 
         if (authorized) { return children; }
         else { return <Redirect to={{ pathname: "/unlock", state: state }} />; }
