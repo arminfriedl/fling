@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -146,5 +147,24 @@ public class FlingService {
 
     log.debug("Generated share id {}", shareId);
     return shareId;
+  }
+
+  public FlingDto replace(UUID id, @Valid FlingDto flingDto) {
+    FlingEntity flingEntity = flingRepository.getOne(id);
+    flingEntity.setId(id);
+    flingEntity.setAllowUpload(flingDto.getAllowUpload());
+    flingEntity.setDirectDownload(flingDto.getDirectDownload());
+    flingEntity.setExpirationClicks(flingDto.getExpirationClicks());
+    flingEntity.setExpirationTime(flingDto.getExpirationTime());
+    flingEntity.setName(flingDto.getName());
+    flingEntity.setShareId(flingDto.getShareId());
+    
+    if(!flingEntity.getAuthCode().equals(flingDto.getAuthCode())
+        && !flingEntity.getAuthCode().equals(hashAuthCode(flingDto.getAuthCode()))) {
+      
+      flingEntity.setAuthCode(hashAuthCode(flingDto.getAuthCode()));
+    }
+
+    return flingMapper.map(flingEntity);
   }
 }

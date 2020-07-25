@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -106,6 +107,27 @@ public class FlingControllerTest {
         .content(mapper.writeValueAsString(invalidFlingDto))
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void replaceFling_validatesBody_notOk() throws Exception {
+    FlingDto invalidFlingDto = new FlingDto();
+
+    mockMvc.perform(put("/api/fling/{id}", flingId)
+        .content(mapper.writeValueAsString(invalidFlingDto))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void replaceFling_ok() throws Exception {
+    FlingDto flingDto = new FlingDto(flingId, "new-name", Instant.EPOCH, "shareId", "new-authCode",
+      false, true, true, 1, null);
+
+    mockMvc.perform(put("/api/fling/{id}", flingId)
+        .content(mapper.writeValueAsString(flingDto))
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 
   @Test

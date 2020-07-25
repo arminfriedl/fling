@@ -1,4 +1,5 @@
 import log from 'loglevel';
+import { cloneDeep, toPlainObject } from 'lodash';
 
 import { SET_FLINGS, SET_ACTIVE_FLING, ADD_FLING } from "./actionTypes";
 import { FlingClient } from "../util/fc";
@@ -6,21 +7,21 @@ import { FlingClient } from "../util/fc";
 function setFlingsAction(flings) {
     return {
         type: SET_FLINGS,
-        payload: flings
+        payload: _purify(flings)
     }
 }
 
 function addFlingAction(fling) {
     return {
         type: ADD_FLING,
-        payload: fling
+        payload: _purify(fling)
     }
 }
 
 function setActiveFlingAction(fling) {
     return {
         type: SET_ACTIVE_FLING,
-        payload: fling
+        payload: _purify(fling)
     }
 }
 
@@ -53,6 +54,13 @@ function setActiveFling(id) {
                 })
         }
     }
+}
+
+function _purify(o) {
+    if(Array.isArray(o)) {
+        return o.map(e => toPlainObject(cloneDeep(e)));
+    }
+    return toPlainObject(cloneDeep(o));
 }
 
 function retrieveFlings() {

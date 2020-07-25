@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
@@ -153,6 +154,40 @@ public class FlingServiceTest {
 
     FlingDto createdFling = flingService.create(flingDto);
     assertThat(createdFling.getShareId(), is("test"));
+  }
+  
+  @Test
+  public void replace_newName_expirationClicks_setsNameAndExpirationClicks() {
+    FlingDto flingDto = FlingDto.builder()
+        .name("testName")
+        .authCode(flingEntity1.getAuthCode())
+        .expirationClicks(2)
+        .build();
+
+    when(flingRepository.getOne(flingEntity1.getId())).thenReturn(flingEntity1);
+    FlingDto updatedEntity = flingService.replace(flingEntity1.getId(), flingDto);
+    
+    assertThat(updatedEntity.getId(), is(flingEntity1.getId()));
+    assertThat(updatedEntity.getName(), is("testName"));
+    assertThat(updatedEntity.getAuthCode(), is(flingEntity1.getAuthCode()));
+    assertThat(updatedEntity.getExpirationClicks(), is(2));
+  }
+  
+  @Test
+  public void replace_newAuthCode_setsNewHashedAuthCode() {
+  FlingDto flingDto = FlingDto.builder()
+        .name(flingEntity1.getName())
+        .authCode("new-secret")
+        .build();
+  
+    when(passwordEncoder.encode("new-secret")).thenReturn("new-secret-hash");
+    when(flingRepository.getOne(flingEntity1.getId())).thenReturn(flingEntity1);
+    FlingDto updatedEntity = flingService.replace(flingEntity1.getId(), flingDto);
+
+    verify(passwordEncoder, atLeast(1)).encode("new-secret");
+    assertThat(updatedEntity.getId(), is(flingEntity1.getId()));
+    assertThat(updatedEntity.getAuthCode(), is("new-secret-hash"));
+    assertThat(updatedEntity.getName(), is(flingEntity1.getName()));
   }
 
   @Test
