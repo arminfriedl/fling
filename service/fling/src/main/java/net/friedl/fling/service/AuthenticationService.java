@@ -22,7 +22,6 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.model.dto.AdminAuthDto;
-import net.friedl.fling.model.dto.FlingDto;
 import net.friedl.fling.model.dto.UserAuthDto;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.entities.TokenEntity;

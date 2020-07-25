@@ -12,7 +12,7 @@ export default function Unlock() {
 
   useEffect(() => {
     let authClient = new AuthClient();
-    let userAuth = new fc.UserAuth(location.state.shareId, "")
+    let userAuth = new fc.UserAuth(location.state.shareId, "");
 
     authClient.authenticateUser({ 'userAuth': userAuth })
       .then(response => {
@@ -20,7 +20,7 @@ export default function Unlock() {
         sessionStorage.setItem('token', response);
         history.replace(location.state.from);
       }).catch(error => {
-        log.info("Fling protected. Could not unlock without code.")
+        log.info("Fling protected. Could not unlock without code.");
       });
   }, [location, history]);
 
@@ -46,7 +46,7 @@ export default function Unlock() {
   function handleSubmit(ev) {
     ev.preventDefault();
     let authClient = new AuthClient();
-    let userAuth = new fc.UserAuth(shareId, authCode)
+    let userAuth = new fc.UserAuth(shareId, authCode);
 
     authClient.authenticateUser({ 'userAuth': userAuth })
       .then(response => {

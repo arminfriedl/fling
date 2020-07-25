@@ -122,7 +122,7 @@ public class FlingControllerTest {
   @Test
   public void replaceFling_ok() throws Exception {
     FlingDto flingDto = new FlingDto(flingId, "new-name", Instant.EPOCH, "shareId", "new-authCode",
-      false, true, true, 1, null);
+        false, true, true, 1, null);
 
     mockMvc.perform(put("/api/fling/{id}", flingId)
         .content(mapper.writeValueAsString(flingDto))
@@ -275,7 +275,11 @@ public class FlingControllerTest {
     byte[] testZip = new byte[testZipInt.length];
     for (int idx = 0; idx < testZip.length; idx++) testZip[idx] = (byte) testZipInt[idx];
 
-    when(archiveService.getFling(any())).thenReturn(new ByteArrayInputStream(testZip));
+    when(archiveService.getFling(any()))
+        .thenAnswer((invocation) -> {
+          // need to use thenAnswer here to always return a fresh new (unclosed) input stream
+          return new ByteArrayInputStream(testZip);
+        });
 
     mockMvc.perform(get("/api/fling/{id}/data", flingId))
         .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))

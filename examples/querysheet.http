@@ -16,12 +16,29 @@ Content-Type: application/json
 {"adminName": "admin", "adminPassword":"123"}
 -> run-hook (restclient-set-var ":token" (buffer-substring-no-properties 1 (line-end-position)))
 
-:token = Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTUxNzY4OTksImV4cCI6MTU5NTM1Njg5OSwic3ViIjoiYWRtaW4ifQ.uRh_xBCrBiLQEBah9I8bYWM-Zph-V_pzQVdaGSU5Mlc
+:token = Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTU2NzUxMjAsImV4cCI6MTU5NTg1NTEyMCwic3ViIjoiYWRtaW4ifQ.WzrGTTZTYHYOw8SskHQ2_sob2tzLIF6q8y8_2oyuafs
 
 # Get all flings
 GET http://localhost:8080/api/fling
 Content-Type: application/json
 :token
+
+:flingid = 9f7353a3-efaa-41af-9f93-61e02dc5e440
+
+# Put a fling
+PUT http://localhost:8080/api/fling/:flingid
+Content-Type: application/json
+:token
+  {
+    "id": "9f7353a3-efaa-41af-9f93-61e02dc5e440",
+    "name": "Shared Fling from querysheetsdfasfd",
+    "creationTime": 1595253659362,
+    "shareId": "WWgTlNZJPZDQ6oowUYfxcQqq",
+    "directDownload": false,
+    "allowUpload": false,
+    "shared": true,
+    "expirationClicks": 12
+  }
 
 # Add a new fling
 POST http://localhost:8080/api/fling

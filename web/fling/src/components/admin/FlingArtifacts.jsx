@@ -26,7 +26,7 @@ function FlingArtifactControl(props) {
         log.trace(`Generated download url: ${url}`);
         frame.src = url;
         iframeContainer.current.appendChild(frame);
-      })
+      });
   }
 
   return (

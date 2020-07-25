@@ -101,11 +101,14 @@ public class FlingController {
   public ResponseEntity<Resource> getFlingData(@PathVariable UUID id) throws IOException {
     FlingDto flingDto = flingService.getById(id);
     InputStreamResource data = new InputStreamResource(archiveService.getFling(id));
+    Long length = data.contentLength();
+
+    data = new InputStreamResource(archiveService.getFling(id));
 
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION,
             "attachment;filename=\"" + flingDto.getName() + ".zip" + "\"")
-        .contentLength(200L) // FIXME
+        .contentLength(length)
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .body(data);
   }
