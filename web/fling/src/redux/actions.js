@@ -56,13 +56,6 @@ function setActiveFling(id) {
     }
 }
 
-function _purify(o) {
-    if(Array.isArray(o)) {
-        return o.map(e => toPlainObject(cloneDeep(e)));
-    }
-    return toPlainObject(cloneDeep(o));
-}
-
 function retrieveFlings() {
     return (dispatch, getState) => {
         const { flings: { activeFling } } = getState();
@@ -92,6 +85,22 @@ function deleteFling(id) {
             .catch(error =>
                 log.error(`Could not delete fling ${id}: ${error}`));
     }
+}
+
+/**
+ * Purify the object or array `o` to a plain, simple javascript object.
+ *
+ * This is used for two reasons on the store:
+ * - The state itself should be kept simple. It is a mere structure of simple
+ *      values. Any logic acting upon the state must be defined on other layers.
+ * - Complex objects interact in hard to understand ways with libraries
+ *      like react and immer. A simple object is more versatile and predictable.
+ */
+function _purify(o) {
+    if(Array.isArray(o)) {
+        return o.map(e => toPlainObject(cloneDeep(e)));
+    }
+    return toPlainObject(cloneDeep(o));
 }
 
 export { retrieveFlings, setActiveFling, deleteFling };

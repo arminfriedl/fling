@@ -121,6 +121,7 @@ public class FlingService {
   }
 
   private String hashAuthCode(String authCode) {
+    if (!StringUtils.hasText(authCode)) return null;
     String hash = passwordEncoder.encode(authCode);
     log.debug("Hashed authentication code to {}", hash);
     return hash;
@@ -154,17 +155,14 @@ public class FlingService {
     flingEntity.setId(id);
     flingEntity.setAllowUpload(flingDto.getAllowUpload());
     flingEntity.setDirectDownload(flingDto.getDirectDownload());
+    flingEntity.setShared(flingDto.getShared());
     flingEntity.setExpirationClicks(flingDto.getExpirationClicks());
     flingEntity.setExpirationTime(flingDto.getExpirationTime());
     flingEntity.setName(flingDto.getName());
     flingEntity.setShareId(flingDto.getShareId());
-    
-    if(!flingEntity.getAuthCode().equals(flingDto.getAuthCode())
-        && !flingEntity.getAuthCode().equals(hashAuthCode(flingDto.getAuthCode()))) {
-      
+    if (!flingDto.getAuthCode().equals(flingEntity.getAuthCode())) {
       flingEntity.setAuthCode(hashAuthCode(flingDto.getAuthCode()));
     }
-
     return flingMapper.map(flingEntity);
   }
 }

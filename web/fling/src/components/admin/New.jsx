@@ -66,17 +66,9 @@ export default function New(props) {
 
     const flingClient = new FlingClient();
     flingClient.getFlingByShareId(ev.currentTarget.value)
-      .then(result => {
-        setShareUrlUnique(false);
-      }).catch(error => {
-        if(error.status === 404) {
-          setShareUrlUnique(true);
-        }
-      }).finally(() => {
-        s.shareUrl = value;
-        f.sharing = s;
-        setFling(f);
-      });
+      .then(result => setShareUrlUnique(false))
+      .catch(error => error.status === 404 && setShareUrlUnique(true) )
+      .finally(() => { s.shareUrl = value; f.sharing = s; setFling(f); });
   }
 
   function setName(ev) {
@@ -157,9 +149,9 @@ export default function New(props) {
       }
     }
 
-    flingClient.postFling({fling: flingEntity})
-               .then(() => handleClose())
-               .catch(error => log.error(error))
+    flingClient.postFling({ fling: flingEntity })
+      .then(() => handleClose())
+      .catch(error => log.error(error))
   }
 
   return (

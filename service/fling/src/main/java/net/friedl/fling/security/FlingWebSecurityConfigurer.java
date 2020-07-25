@@ -99,9 +99,13 @@ public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
           .antMatchers(HttpMethod.POST, "/api/fling/{flingId}/artifact")
           .access("@authorizationService.allowUpload(#flingId, authentication)")
         .and()
-        // only admin can create, delete and list flings
+        // only admin can create, delete, list and modify flings
         .authorizeRequests()
           .antMatchers(HttpMethod.DELETE, "/api/fling/{flingId}")
+          .hasAnyAuthority(FLING_ADMIN.getAuthority())
+        .and()
+        .authorizeRequests()
+          .antMatchers(HttpMethod.PUT, "/api/fling/{flingId}")
           .hasAnyAuthority(FLING_ADMIN.getAuthority())
         .and()
         .authorizeRequests()

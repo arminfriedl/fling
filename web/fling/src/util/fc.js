@@ -12,7 +12,7 @@ let clientConfig = (token) => {
   config.basePath = process.env.REACT_APP_API.replace(/\/+$/, '');
 
   token = token || sessionStorage.getItem('token');
-  if(token) { config.authentications['bearer'].accessToken = token; }
+  if (token) { config.authentications['bearer'].accessToken = token; }
 
   return config;
 };
@@ -29,4 +29,4 @@ function AuthClient(token) {
   return new fc.AuthApi(clientConfig(token));
 }
 
-export {FlingClient, ArtifactClient, AuthClient, fc};
+export { FlingClient, ArtifactClient, AuthClient, fc };
