@@ -16,7 +16,6 @@ import net.friedl.fling.model.json.PathSerializer;
 
 @Configuration
 public class FlingConfiguration {
-
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();

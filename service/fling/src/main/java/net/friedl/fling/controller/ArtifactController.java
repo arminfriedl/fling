@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,8 @@ import net.friedl.fling.service.archive.ArchiveService;
 @SecurityRequirement(name = "bearer")
 @Validated
 public class ArtifactController {
+  @Value("${fling.max-artifact-size:-1}")
+  private Long maxArtifactSize;
 
   private ArtifactService artifactService;
   private ArchiveService archiveService;
@@ -58,6 +61,10 @@ public class ArtifactController {
   @PostMapping(path = "/{id}/data")
   public void uploadArtifactData(@PathVariable UUID id, HttpServletRequest request)
       throws IOException {
+    if(maxArtifactSize >= 0 && maxArtifactSize < request.getContentLengthLong()) {
+      throw new IOException("Maximum artifact size exceeded");
+    }
+
     archiveService.storeArtifact(id, request.getInputStream());
   }
 

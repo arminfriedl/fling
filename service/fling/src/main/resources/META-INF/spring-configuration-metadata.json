@@ -70,6 +70,12 @@
 			"type": "java.util.Long",
 			"description": "Time until JWT tokens expire",
 			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		},
+		{
+			"name": "fling.max-artifact-size",
+			"type": "java.util.Long",
+			"description": "Maximum artifact size in bytes. -1 to disable.",
+			"sourceType": "net.friedl.fling.controller.ArtifactController"
 		}
 	]
 } 

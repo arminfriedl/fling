@@ -100,7 +100,9 @@ export default function FlingArtifacts() {
       .then(result => {
         log.debug(`Got ${result.length} artifacts`);
         for (let artifact of result) {
-          artifacts.push(<FlingArtifactRow key={artifact.id} artifact={artifact} reloadArtifactsFn={getArtifacts} />);
+          if(artifact.archived) {
+            artifacts.push(<FlingArtifactRow key={artifact.id} artifact={artifact} reloadArtifactsFn={getArtifacts} />);
+          }
         }
 
         setArtifacts(artifacts);
