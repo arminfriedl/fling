@@ -2,6 +2,7 @@ package net.friedl.fling.service;
 
 import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import net.friedl.fling.security.authentication.FlingToken;
 
 @Slf4j
 @Service
+@Transactional
 public class AuthorizationService {
   private FlingRepository flingRepository;
 
@@ -32,7 +34,8 @@ public class AuthorizationService {
       return true;
     }
 
-    if (!flingRepository.getOne(flingId).getAllowUpload()) {
+    FlingEntity flingEntity = flingRepository.getOne(flingId);
+    if (flingEntity.getAllowUpload() == null || !flingEntity.getAllowUpload()) {
       log.debug("Fling[.id={}] does not not allow uploads");
       return false;
     }
