@@ -20,7 +20,8 @@ fling:
   archive.filesystem.archive-path: "/var/fling/files"
   security:
     allowed-origins:
-      - "https://friedl.net"
+      - "https://fling.friedl.net"
+      - "http://localhost:3000"
       - "http://localhost:3000"
       - "http://localhost:5000"
       - "http://10.0.2.2:5000"

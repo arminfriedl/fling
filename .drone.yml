@@ -74,12 +74,13 @@ steps:
     - ls -al
     - cd web/fling
     - npm install && npm run build
+    - npm install --no-cache @fling/flingclient # make sure flingclient is not cached
     - tar czf fling-web-$VERSION.tar.gz build/
     - curl --user "$NEXUS_USER:$NEXUS_PASSWORD"
            --upload-file ./fling-web-$VERSION.tar.gz
            https://nexus.friedl.net/repository/build-artifacts/fling-web-$VERSION.tar.gz
 
-- name: publish
+- name: publish branch
   image: plugins/docker
   settings:
     username:
@@ -92,6 +93,29 @@ steps:
     tags: 0.1.0-snapshot
     build_args:
       - VERSION=0.1.0-snapshot
+  when:
+    branch:
+      exclude:
+        - master
+
+- name: publish master
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    dockerfile: container/Dockerfile
+    context: ./container
+    repo: arminfriedl/fling
+    tags:
+      - 0.1.0-snapshot
+      - latest
+    build_args:
+      - VERSION=0.1.0-snapshot
+  when:
+    branch:
+      - master
 
 volumes:
 - name: m2-cache
