@@ -1,89 +1,78 @@
 package net.friedl.fling.service;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.UUID;
 import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JsonParser;
-import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 import net.friedl.fling.model.dto.ArtifactDto;
 import net.friedl.fling.model.mapper.ArtifactMapper;
-import net.friedl.fling.persistence.archive.Archive;
-import net.friedl.fling.persistence.archive.ArchiveException;
 import net.friedl.fling.persistence.entities.ArtifactEntity;
+import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.ArtifactRepository;
 import net.friedl.fling.persistence.repositories.FlingRepository;
+import net.friedl.fling.service.archive.ArchiveService;
 
+@Slf4j
 @Service
 @Transactional
 public class ArtifactService {
 
-  private FlingRepository flingRepository;
   private ArtifactRepository artifactRepository;
+  private FlingRepository flingRepository;
   private ArtifactMapper artifactMapper;
-  private Archive archive;
+  private ArchiveService archiveService;
 
   @Autowired
   public ArtifactService(ArtifactRepository artifactRepository, FlingRepository flingRepository,
-      ArtifactMapper artifactMapper, Archive archive) {
+      ArtifactMapper artifactMapper, ArchiveService archiveService) {
+
     this.artifactRepository = artifactRepository;
     this.flingRepository = flingRepository;
     this.artifactMapper = artifactMapper;
-    this.archive = archive;
+    this.archiveService = archiveService;
   }
 
-  public List<ArtifactDto> findAllArtifacts(Long flingId) {
-    return artifactMapper.map(artifactRepository.findAllByFlingId(flingId));
+  /**
+   * Fetch an {@link ArtifactDto} by id. Must be called with a valid artifact id, otherwise bails
+   * out with a {@link RuntimeException}. Synchronization must be done on client side.
+   * 
+   * @param id A valid {@link UUID} for an existing entity in the database. Not null.
+   * @return The ArtifactDto corresponding to the {@code id}
+   */
+  @NotNull
+  public ArtifactDto getById(@NotNull UUID id) {
+    return artifactMapper.map(artifactRepository.getOne(id));
   }
 
-  public ArtifactDto storeArtifact(Long flingId, InputStream artifact) throws ArchiveException {
-    var flingEntity = flingRepository.findById(flingId).orElseThrow();
-    var archiveId = archive.store(artifact);
+  /**
+   * Create a new {@link ArtifactEntity} from {@code artifactDto} for the fling {@code flingId}.
+   * 
+   * @param flingId Id of an existing {@link FlingEntity}
+   * @param artifactDto The data for the new {@link ArtifactEntity}
+   * @return The newly created artifact
+   */
+  public ArtifactDto create(UUID flingId, ArtifactDto artifactDto) {
+    FlingEntity flingEntity = flingRepository.getOne(flingId);
 
-    ArtifactEntity artifactEntity = new ArtifactEntity();
-    artifactEntity.setDoi(archiveId);
+    log.debug("Creating new ArtifactEntity for ArtifactDto[.path={}]", artifactDto.getPath());
+    ArtifactEntity artifactEntity = artifactMapper.map(artifactDto);
     artifactEntity.setFling(flingEntity);
-
-    artifactRepository.save(artifactEntity);
-
+    artifactEntity = artifactRepository.save(artifactEntity);
     return artifactMapper.map(artifactEntity);
   }
 
-  public Optional<ArtifactDto> findArtifact(Long artifactId) {
-    return artifactMapper.map(artifactRepository.findById(artifactId));
-  }
-
-  public ArtifactDto mergeArtifact(Long artifactId, String body) {
-    JsonParser jsonParser = JsonParserFactory.getJsonParser();
-    Map<String, Object> parsedBody = jsonParser.parseMap(body);
-
-    artifactRepository.findById(artifactId)
-        // map entity to dto
-        .map(artifactMapper::map)
-        // merge parsedBody into dto
-        .map(a -> artifactMapper.merge(a, parsedBody))
-        // map dto to entity
-        .map(artifactMapper::map)
-        .ifPresent(artifactRepository::save);
-
-    return artifactMapper.map(artifactRepository.getOne(artifactId));
-  }
-
-  public void deleteArtifact(Long artifactId) throws ArchiveException {
-    var doi = artifactRepository.getOne(artifactId).getDoi();
-    artifactRepository.deleteById(artifactId);
-    archive.remove(doi);
-  }
-
-  public String generateDownloadId(Long artifactId) {
-    // TODO: This id is not secured! Generate temporary download id
-    return artifactRepository.getOne(artifactId).getDoi();
-  }
-
-  public InputStream downloadArtifact(String downloadId) throws ArchiveException {
-    return archive.get(downloadId);
+  /**
+   * Deletes an artifact identified by {@code id}. NOOP if the artifact cannot be found.
+   * 
+   * @param id An {@link UUID} that identifies the artifact
+   * @throws IOException If the deletion failed
+   */
+  public void delete(UUID id) throws IOException {
+    archiveService.deleteArtifact(id);
+    artifactRepository.deleteById(id);
+    log.info("Deleted artifact {}", id);
   }
 }

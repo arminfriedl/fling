@@ -1,24 +1,41 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch } from "react-redux";
+import { useParams } from 'react-router-dom';
+
+import { retrieveFlings, setActiveFling } from "../../redux/actions";
 
 import Navbar from './Navbar';
 import FlingList from './FlingList';
 import FlingContent from './FlingContent';
 
-import {useParams} from 'react-router-dom';
-
 export default function FlingAdmin() {
-    let { fling } = useParams();
+  const { flingId } = useParams();
+  const dispatch = useDispatch();
 
-    return(
-        <div>
-          <Navbar />
+  useEffect(() => {
+    dispatch(retrieveFlings());
+  }, [dispatch]);
 
-          <div className="container">
-            <div className="columns mt-2">
-              <div className="column col-sm-12 col-lg-3 col-2"> <FlingList activeFling={fling} /> </div>
-              <div className="column col-sm-12"><FlingContent activeFling={fling} /></div>
-            </div>
+  useEffect(() => {
+    if (flingId) {
+      dispatch(setActiveFling(flingId));
+    }
+  }, [flingId, dispatch]);
+
+  return (
+    <div>
+      <Navbar />
+
+      <div className="container">
+        <div className="columns mt-2">
+          <div className="column col-sm-12 col-lg-3 col-2">
+            <FlingList />
+          </div>
+          <div className="column col-sm-12">
+            <FlingContent />
           </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }

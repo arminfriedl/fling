@@ -19,6 +19,46 @@ steps:
     - cd service/fling
     - mvn -Pprod clean deploy
 
+- name: runservice
+  image: adoptopenjdk:11-jre-hotspot
+  commands:
+  - cd service/fling/target
+  - java -jar fling-0.1.0-SNAPSHOT.jar
+  detach: true
+
+- name: generate-clients
+  image: alpine
+  environment:
+    NEXUS_USER:
+      from_secret: nexus_user
+    NEXUS_PASSWORD:
+      from_secret: nexus_password
+  commands:
+  - apk add --update --no-cache openjdk11 npm
+  - sleep 20
+  - npm install @openapitools/openapi-generator-cli -g
+  # Python client
+  - openapi-generator generate
+      -i http://runservice:8080/v3/api-docs
+      -g python
+      --additional-properties packageName=flingclient
+      -o flingclient.py
+      --enable-post-process-file
+  - cd flingclient.py
+  - cd ..
+  # JavaScript client
+  - openapi-generator generate
+      -i http://runservice:8080/v3/api-docs
+      -g javascript
+      --additional-properties projectName=@fling/flingclient,usePromises=true,npmRepository=https://nexus.friedl.net/repository/npm-private/
+      -o flingclient.js
+      --enable-post-process-file
+  - cd flingclient.js && npm install && npm run build
+  - echo "https://nexus.friedl.net/repository/npm-private/" >> .npmrc
+  - echo -n "_auth=" >> .npmrc && echo -n "$NEXUS_USER:$NEXUS_PASSWORD" | base64 >> .npmrc
+  - echo "email=dev@friedl.net" >> .npmrc
+  - npm publish
+
 - name: build-web
   image: node:latest
   volumes:
@@ -29,12 +69,15 @@ steps:
       from_secret: nexus_user
     NEXUS_PASSWORD:
       from_secret: nexus_password
+    VERSION: 0.1.0-snapshot
   commands:
     - ls -al
     - cd web/fling
     - npm install && npm run build
-    - tar czf fling-web-latest.tar.gz build/
-    - curl --user "$NEXUS_USER:$NEXUS_PASSWORD" --upload-file ./fling-web-latest.tar.gz https://nexus.friedl.net/repository/build-artifacts/fling-web-latest.tar.gz
+    - tar czf fling-web-$VERSION.tar.gz build/
+    - curl --user "$NEXUS_USER:$NEXUS_PASSWORD"
+           --upload-file ./fling-web-$VERSION.tar.gz
+           https://nexus.friedl.net/repository/build-artifacts/fling-web-$VERSION.tar.gz
 
 - name: publish
   image: plugins/docker
@@ -46,10 +89,9 @@ steps:
     dockerfile: container/Dockerfile
     context: ./container
     repo: arminfriedl/fling
-    tags: latest
-  when:
-    branch:
-    - master
+    tags: 0.1.0-snapshot
+    build_args:
+      - VERSION=0.1.0-snapshot
 
 volumes:
 - name: m2-cache

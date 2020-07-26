@@ -1,277 +1,272 @@
 import log from 'loglevel';
-import React, {useState, useEffect} from 'react';
+import React, { useState } from 'react';
+import produce from 'immer';
 
-import {flingClient} from '../../util/flingclient';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { retrieveFlings } from "../../redux/actions";
+import { FlingClient } from '../../util/fc';
 
 export default function Settings(props) {
-    let defaultState = () => ({name: "", authCode: "",
-                               sharing: {directDownload: false, allowUpload: true, shared: true, shareUrl: ""},
-                               expiration: {}});
+  let flingClient = new FlingClient();
+  let dispatch = useDispatch();
 
-    let [fling, setFling] = useState(defaultState());
-    let [shareUrlUnique, setShareUrlUnique] = useState(true);
-    let [authCodeChangeable, setAuthCodeChangeable] = useState(false);
-    let [reload, setReload] = useState(true);
+  /**
+   * The active fling from the redux store. Treat this as immutable.
+   */
+  let activeFling = useSelector(state => state.flings.activeFling);
 
-    useEffect(() => {
-        if(props.activeFling && reload) {
-            flingClient.getFling(props.activeFling)
-                .then(result => {
-                    let f = {...fling, ...result};
-                    let s = {...fling.sharing, ...result.sharing};
-                    let e = {...fling.expiration, ...result.expiration};
+  /**
+   * Deep clone the active fling from redux into a draft. Changes to the
+   * settings will be stored in the draft until saved and pushed to the
+   * backend. This in turn will synchronize back to the redux store.
+   *
+   * The draft, just as the activeFling, is of type Fling
+   */
+  let [draft, setDraft] = useState(produce(activeFling, draft => draft));
 
-                    f.sharing = s;
-                    f.expiration = e;
-                    setFling(f);
+  let [shareUrlUnique, setShareUrlUnique] = useState(true);
+  let [authCodeChangeable, setAuthCodeChangeable] = useState(false);
+  let [expirationType, setExpirationType] = useState(activeFling.expirationClicks
+    ? "clicks"
+    : activeFling.expirationTime ? "time" : "never");
 
-                    setAuthCodeChangeable(!f.authCode);
-                    setReload(false);
-                });
-        }
-    }, [props.activeFling, reload, fling]);
+  /**
+   * Publishes the draft to the backend and refreshes the redux store
+   */
+  function publishDraft() {
+    flingClient.putFling(activeFling.id, { fling: draft })
+      .then(
+        success => {
+          log.info("Saved new settings {}", draft);
+          dispatch(retrieveFlings());
+        })
+      .catch(error => log.error(`Could not save new settings for ${activeFling.id}: `, error));
+  }
 
-    function reloadSettings(ev) {
-        ev.preventDefault();
-        setFling(defaultState());
-        setReload(true);
-    }
+  /**
+   * Resets the draft to a new clone of the active fling. All draft
+   * modifications get lost.
+   */
+  function resetDraft() {
+    setDraft(produce({}, draft => activeFling));
+  }
 
-    function resetAuthCode(ev) {
-        if(fling.authCode) {
-            let f = {...fling};
-            f.authCode = "";
-            setFling(f);
-        }
+  /**
+   * A helper shim for persistent produce.
+   *
+   * Executes `fun` in immer.produce, hereby generating a new draft `newDraft`,
+   * and sets it into local state via `setDraft(newDraft)`
+   */
+  let _pproduce = (fun) => (...args) => {
+    let x = produce(fun)(...args);
+    setDraft(x);
+  }
 
-        if(!ev.currentTarget.checked) {
-            setAuthCodeChangeable(true);
-        }
-    }
-
-    function toggleSharing(ev) {
-        let f = {...fling};
-        let s = {...fling.sharing};
-
-        if(ev.currentTarget.id === "direct-download") {
-            if(ev.currentTarget.checked) {
-                s.directDownload = true;
-                s.shared = true;
-                s.allowUpload = false;
-            } else {
-                s.directDownload = false;
-            }
-        } else if(ev.currentTarget.id === "allow-upload") {
-            if(ev.currentTarget.checked) {
-                s.allowUpload = true;
-                s.shared = true;
-                s.directDownload = false;
-            } else {
-                s.allowUpload = false;
-            }
-        } else if(ev.currentTarget.id === "shared") {
-            if(!ev.currentTarget.checked) {
-                s.allowUpload = s.directDownload = s.shared = false;
-            } else {
-                s.shared = true;
-            }
-        }
-
-        f.sharing = s;
-
-        setFling(f);
-    }
-
-    function setShareUrl(ev) {
-        let f = {...fling};
-        let s = {...fling.sharing}; //TODO: expiration is not cloned
-        let value = ev.currentTarget.value;
-
-        if(!value) {
-            setShareUrlUnique(false);
-            s.shareUrl = value;
-            f.sharing = s;
-            setFling(f);
-            return;
-        }
-
-        flingClient.getFlingByShareId(ev.currentTarget.value)
-            .then(result => {
-                if(!result) {
-                    setShareUrlUnique(true);
-                } else if(props.activeFling === result.id) { // share url didn't change
-                    setShareUrlUnique(true);
-                } else {
-                    setShareUrlUnique(false);
-                }
-
-                s.shareUrl = value;
-                f.sharing = s;
-                setFling(f);
-            });
-    }
-
-    function setName(ev) {
-        let f = {...fling};
-        let value = ev.currentTarget.value;
-
-        f.name = value;
-        setFling(f);
-    }
-
-    function setExpirationType(ev) {
-        let f = {...fling};
-        let e = {...fling.expiration}; //TODO: sharing is not cloned
-        let value = ev.currentTarget.value;
-
-        if(value === "never") {
-            e = {};
+  /**
+   * Sets the sharing toggles to valid combinations depending on the changed
+   * setting and its new value.
+   *
+   * Creates a new draft and sets it into the local state.
+   */
+  let toggleSharing = _pproduce((newDraft, setting, enabled) => {
+    switch (setting) {
+      case "direct-download":
+        if (enabled) {
+          newDraft.directDownload = true;
+          newDraft.shared = true;
+          newDraft.allowUpload = false;
         } else {
-            e.type = value;
-            e.value = "";
+          newDraft.directDownload = false;
         }
+        return newDraft;
+      case "allow-upload":
+        if (enabled) {
+          newDraft.allowUpload = true;
+          newDraft.shared = true;
+          newDraft.directDownload = false;
+        } else {
+          newDraft.allowUpload = false;
+        }
+        return newDraft;
+      case "shared":
+        if (!enabled) {
+          newDraft.allowUpload = false;
+          newDraft.directDownload = false;
+          newDraft.shared = false;
+        } else {
+          newDraft.shared = true;
+        }
+        return newDraft;
+      default:
+        log.warn("Unknown action");
+        break;
+    };
+  })
+  /** Sets the Fling.name. Creates a new draft and sets it into the local state. */
+  let setName = _pproduce((newDraft, name) => { newDraft.name = name });
+  /** Sets the Fling.shareId. Creates a new draft and sets it into the local
+   *  state. Sets `setShareUrlUnique`. */
+  let setShareId = _pproduce((newDraft, shareId) => {
+    newDraft.shareId = shareId;
 
-        f.expiration = e;
-        setFling(f);
+    flingClient.getFlingByShareId(shareId)
+      .then(result => shareId !== activeFling.shareId && setShareUrlUnique(false))
+      .catch(error => error.status === 404 && setShareUrlUnique(true));
+  });
+  /** Sets the Fling.authCode. Creates a new draft and sets it into the local state. */
+  let setAuthCode = _pproduce((newDraft, authCode) => {
+    setAuthCodeChangeable(true);
+    if (!authCode) return newDraft;
+    newDraft.authCode = authCode
+  });
+
+  let resetAuthCode = _pproduce((newDraft) => {
+    setAuthCodeChangeable(true);
+    newDraft.authCode = "";
+    return newDraft;
+  });
+
+  let setExpiration = _pproduce((newDraft, type, value) => {
+    setExpirationType(type)
+    switch (type) {
+      case "clicks":
+        newDraft.expirationTime = "";
+        newDraft.expirationClicks = value;
+        break;
+      case "time":
+        newDraft.expirationClicks = "";
+        newDraft.expirationTime = value;
+        break;
+      case "never":
+        newDraft.expirationClicks = "";
+        newDraft.expirationTime = "";
+        break;
+      default:
+        log.error("Unknown expiration type");
+        break;
     }
-
-    function setExpirationValue(ev) {
-        let f = {...fling};
-        let e = {...fling.expiration}; //TODO: sharing is not cloned
-        let value = e.type === "time" ? ev.currentTarget.valueAsNumber: ev.currentTarget.value;
-
-        e.value = value;
-
-        f.expiration = e;
-        setFling(f);
-    }
-
-    function formatExpirationTime() {
-        if (!fling.expiration || !fling.expiration.value || fling.expiration.type !== "time")
-            return "";
+  });
 
 
-        let date = new Date(fling.expiration.value);
-        let fmt = date.toISOString().split("T")[0];
-        return fmt;
-    }
+  let resetExpiration = (draft, type) => {
+    setExpiration(draft, type, "");
+  };
 
-    function setAuthCode(ev) {
-        let f = {...fling};
-        let value = ev.currentTarget.value;
-
-        f.authCode = value;
-        setFling(f);
-    }
-
-    function handleSubmit(ev) {
-        ev.preventDefault();
-        log.info(fling);
-        flingClient.putFling(props.activeFling, fling);
-    }
-
-    return(
-        <div className="container">
-          <div className="columns">
-            <div className="p-centered column col-xl-9 col-sm-12 col-6">
-              <form className="form-horizontal" onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <div className="col-3 col-sm-12">
-                    <label className="form-label" htmlFor="input-name">Name</label>
-                  </div>
-                  <div className="col-9 col-sm-12">
-                    <input className="form-input" type="text" id="input-name" value={fling.name} onChange={setName}/>
-                  </div>
-                </div>
-                <div className="form-group">
-                  <div className="col-3 col-sm-12">
-                    <label className="form-label" htmlFor="input-share-url">Share URL</label>
-                  </div>
-                  <div className="col-9 col-sm-12">
-                    <input className="form-input" type="text" id="input-share-url" value={fling.sharing.shareUrl} onChange={setShareUrl} />
-                    <i className={`icon icon-cross text-error ${shareUrlUnique ? "d-hide": "d-visible"}`} />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <div className="col-3 col-sm-12">
-                    <label className="form-label" htmlFor="input-passcode">Passcode</label>
-                  </div>
-                  <div className="col-9 col-sm-12">
-                    <div className="input-group">
-                      <input className={`form-input ${authCodeChangeable ? "d-visible":"d-hide"}`} type="text" readOnly={!authCodeChangeable} value={fling.authCode} onChange={setAuthCode} />
-                      <label className="form-switch ml-2 popover popover-bottom">
-                        <input type="checkbox" checked={!!fling.authCode} onChange={resetAuthCode} />
-                        <i className="form-icon" /> Protected
-                        <div className="popover-container card">
-                          <div className="card-body">
-                            {fling.authCode ? "Click to reset passcode": "Set passcode to enable protection"}
-                          </div>
-                        </div>
-                      </label>
-
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <div className="col-3 col-sm-12">
-                    <label className="form-label">Expiration</label>
-                  </div>
-                  <div className="col-9 col-sm-12">
-                    <div className="form-group">
-                      <select className="form-select" value={fling.expiration.type} onChange={setExpirationType}>
-                        <option value="never">Never</option>
-                        <option value="time">Date</option>
-                        <option value="clicks">Clicks</option>
-                      </select>
-                    </div>
-
-                    <div className={fling.expiration.type === "clicks" ? "d-visible": "d-hide"}>
-                      <div className="input-group">
-                        <span className="input-group-addon">Expire after</span>
-                        <input className="form-input" type="number" value={fling.expiration.value || ""} onChange={setExpirationValue} />
-                        <span className="input-group-addon">Clicks</span>
-                      </div>
-                    </div>
-
-                    <div className={fling.expiration.type === "time" ? "d-visible": "d-hide"}>
-                      <div className="input-group">
-                        <span className="input-group-addon">Expire after</span>
-                        <input className="form-input" type="date" value={formatExpirationTime()} onChange={setExpirationValue} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <div className="col-3 col-sm-12">
-                    <label className="form-label">Settings</label>
-                  </div>
-                  <div className="col-9 col-sm-12">
-
-                    <label className="form-switch form-inline">
-                      <input type="checkbox" id="shared" checked={fling.sharing.shared} onChange={toggleSharing}/>
-                      <i className="form-icon" /> Shared
-                    </label>
-                    <label className="form-switch form-inline">
-                      <input type="checkbox" id="allow-upload" checked={fling.sharing.allowUpload} onChange={toggleSharing}/>
-                      <i className="form-icon" /> Uploads
-                    </label>
-                    <label className="form-switch form-inline">
-                      <input type="checkbox" id="direct-download" checked={fling.sharing.directDownload} onChange={toggleSharing}/>
-                      <i className="form-icon" /> Direct Download
-                    </label>
-                  </div>
-                </div>
-
-                <div className="float-right">
-                  <button className="btn btn-secondary mr-2" onClick={reloadSettings}>Cancel</button>
-                  <input type="submit" className="btn btn-primary" value="Save" />
-                </div>
-              </form>
+  return (
+    <div className="container">
+      <div className="columns">
+        <div className="p-centered column col-xl-9 col-sm-12 col-6">
+          <form className="form-horizontal" onSubmit={(ev) => { ev.preventDefault(); publishDraft(); }}>
+            <div className="form-group">
+              <div className="col-3 col-sm-12">
+                <label className="form-label" htmlFor="input-name">Name</label>
+              </div>
+              <div className="col-9 col-sm-12">
+                <input className="form-input" type="text" id="input-name"
+                  value={draft.name}
+                  onChange={(ev) => setName(draft, ev.target.value)} />
+              </div>
             </div>
-          </div>
+            <div className="form-group">
+              <div className="col-3 col-sm-12">
+                <label className="form-label" htmlFor="input-share-url">Share Id</label>
+              </div>
+              <div className="col-9 col-sm-12">
+                <input className="form-input" type="text" id="input-share-url"
+                  value={draft.shareId}
+                  onChange={ev => setShareId(draft, ev.target.value)} />
+                <i className={`icon icon-cross text-error ${shareUrlUnique ? "d-hide" : "d-visible"}`} />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="col-3 col-sm-12">
+                <label className="form-label" htmlFor="input-passcode">Passcode</label>
+              </div>
+              <div className="col-9 col-sm-12">
+                <div className="input-group">
+                  <input className={`form-input ${!draft.authCode || authCodeChangeable ? "d-visible" : "d-hide"}`} type="text"
+                    value={draft.authCode}
+                    onChange={ev => setAuthCode(draft, ev.target.value)} />
+
+                  <label className="form-switch ml-2 popover popover-bottom">
+                    <input type="checkbox" checked={!!draft.authCode} onChange={ev => resetAuthCode(draft)} />
+                    <i className="form-icon" /> Protected
+                        <div className="popover-container card">
+                      <div className="card-body">
+                        {draft.authCode ? "Click to reset passcode" : "Set passcode to enable protection"}
+                      </div>
+                    </div>
+                  </label>
+
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="col-3 col-sm-12">
+                <label className="form-label">Expiration</label>
+              </div>
+              <div className="col-9 col-sm-12">
+                <div className="form-group">
+                  <select className="form-select" value={expirationType} onChange={ev => resetExpiration(draft, ev.currentTarget.value)}>
+                    <option value="never">Never</option>
+                    <option value="time">Date</option>
+                    <option value="clicks">Clicks</option>
+                  </select>
+                </div>
+
+                <div className={expirationType === "clicks" ? "d-visible" : "d-hide"}>
+                  <div className="input-group">
+                    <span className="input-group-addon">Expire after</span>
+                    <input className="form-input" type="number" value={draft.expirationClicks} onChange={ev => setExpiration(draft, "clicks", ev.target.value)} />
+                    <span className="input-group-addon">Clicks</span>
+                  </div>
+                </div>
+
+                <div className={expirationType === "time" ? "d-visible" : "d-hide"}>
+                  <div className="input-group">
+                    <span className="input-group-addon">Expire after</span>
+                    <input className="form-input" type="date"
+                           value={draft.expirationTime ? (new Date(draft.expirationTime)).toISOString().split('T')[0]: ""}
+                           onChange={ev => setExpiration(draft, "time", ev.target.valueAsNumber)} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="col-3 col-sm-12">
+                <label className="form-label">Settings</label>
+              </div>
+              <div className="col-9 col-sm-12">
+
+                <label className="form-switch form-inline">
+                  <input type="checkbox" id="shared" checked={draft.shared}
+                    onChange={ev => toggleSharing(draft, ev.target.id, ev.target.checked)} />
+                  <i className="form-icon" /> Shared
+                    </label>
+                <label className="form-switch form-inline">
+                  <input type="checkbox" id="allow-upload" checked={draft.allowUpload}
+                    onChange={ev => toggleSharing(draft, ev.target.id, ev.target.checked)} />
+                  <i className="form-icon" /> Uploads
+                    </label>
+                <label className="form-switch form-inline">
+                  <input type="checkbox" id="direct-download" checked={draft.directDownload}
+                    onChange={ev => toggleSharing(draft, ev.target.id, ev.target.checked)} />
+                  <i className="form-icon" /> Direct Download
+                    </label>
+              </div>
+            </div>
+
+            <div className="float-right">
+              <button className="btn btn-secondary mr-2" onClick={resetDraft}>Cancel</button>
+              <input type="submit" className="btn btn-primary" value="Save" />
+            </div>
+          </form>
         </div>
-    );
+      </div>
+    </div>
+  );
 }

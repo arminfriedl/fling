@@ -1,128 +1,149 @@
 package net.friedl.fling.security;
 
+import static net.friedl.fling.security.FlingAuthorities.FLING_ADMIN;
+import static net.friedl.fling.security.FlingAuthorities.FLING_USER;
 import static org.springframework.security.config.Customizer.withDefaults;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.friedl.fling.security.authentication.JwtAuthenticationFilter;
+import net.friedl.fling.security.authentication.filter.BearerAuthenticationFilter;
+import net.friedl.fling.security.authentication.filter.TokenAuthenticationFilter;
+import net.friedl.fling.service.AuthorizationService;
 
 @Slf4j
-@Configuration
 @EnableWebSecurity
+@ConfigurationProperties(prefix = "fling.security")
 @Getter
 @Setter
 public class FlingWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
-  private JwtAuthenticationFilter jwtAuthenticationFilter;
+  private List<String> allowedOrigins;
+
+  private TokenAuthenticationFilter tokenAuthenticationFilter;
+  private BearerAuthenticationFilter bearerAuthenticationFilter;
   private AuthorizationService authorizationService;
-  private FlingSecurityConfiguration securityConfiguration;
 
   @Autowired
-  public FlingWebSecurityConfigurer(JwtAuthenticationFilter jwtAuthenticationFilter,
-      AuthorizationService authorizationService,
-      FlingSecurityConfiguration securityConfiguraiton) {
+  public FlingWebSecurityConfigurer(
+      TokenAuthenticationFilter tokenAuthenticationFilter,
+      BearerAuthenticationFilter bearerAuthenticationFilter,
+      AuthorizationService authorizationService) {
 
-    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.tokenAuthenticationFilter = tokenAuthenticationFilter;
+    this.bearerAuthenticationFilter = bearerAuthenticationFilter;
     this.authorizationService = authorizationService;
-    this.securityConfiguration = securityConfiguraiton;
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     //@formatter:off
-        http
+         http
         .csrf().disable()
         .cors(withDefaults())
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        // Everybody can try to authenticate
+        .headers().frameOptions().disable().and()
+        
+        /**********************************************/
+        /** Authentication Interceptor Configuration **/
+        /**********************************************/
+        .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(bearerAuthenticationFilter, TokenAuthenticationFilter.class)
+        // Do not keep authorization token in session. This would interfere with bearer authentication
+        // in that it is possible to authenticate without a bearer token if the session is kept.
+        // Turn off this confusing and non-obvious behavior.
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+
+        
+        /*************************************/
+        /** API Authorization Configuration **/
+        /*************************************/
+        //! Go from most specific to more !//
+        //! general, as first hit counts  !//
+
+        /**********************************/
+        /** Authorization for: /api/auth **/
+        /**********************************/
+        .authorizeRequests()
+            .antMatchers("/api/auth/derive")
+            .hasAnyAuthority(FLING_ADMIN.getAuthority(), FLING_USER.getAuthority())
+        .and()
         .authorizeRequests()
             .antMatchers("/api/auth/**")
             .permitAll()
         .and()
-        // We need to go from most specific to more general.
-        // Hence, first define user permissions
+
+
+        /***********************************/
+        /** Authorization for: /api/fling **/
+        /***********************************/
         .authorizeRequests()
-            // TODO: This is still insecure since URLs are not encrypted
-            // TODO: iframe requests don't send the bearer, use cookie instead
-            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/download/{downloadId}")
-            .permitAll()
+          .antMatchers(HttpMethod.GET, "/api/fling/share/{shareId}")
+          .access("@authorizationService.allowFlingAccessByShareId(#shareId, authentication)")
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.POST, "/api/artifacts/{flingId}/**")
-            .access("@authorizationService.allowUpload(#flingId, authentication)")
+          .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/**")
+          .access("@authorizationService.allowFlingAccess(#flingId, authentication)")
+        .and()
+       .authorizeRequests()
+          .antMatchers(HttpMethod.POST, "/api/fling/{flingId}/artifact")
+          .access("@authorizationService.allowUpload(#flingId, authentication)")
+        .and()
+        // only admin can create, delete, list and modify flings
+        .authorizeRequests()
+          .antMatchers(HttpMethod.DELETE, "/api/fling/{flingId}")
+          .hasAnyAuthority(FLING_ADMIN.getAuthority())
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.PATCH, "/api/artifacts/{artifactId}")
-            .access("@authorizationService.allowPatchingArtifact(#artifactId, authentication)")
+          .antMatchers(HttpMethod.PUT, "/api/fling/{flingId}")
+          .hasAnyAuthority(FLING_ADMIN.getAuthority())
         .and()
         .authorizeRequests()
-            // TODO: This is still insecure since URLs are not encrypted
-            // TODO: iframe requests don't send the bearer, use cookie instead
-            .antMatchers("/api/artifacts/{artifactId}/{downloadId}/download")
-            .permitAll()
+          .antMatchers(HttpMethod.POST, "/api/fling")
+          .hasAuthority(FLING_ADMIN.getAuthority())
         .and()
         .authorizeRequests()
-            // TODO: Security by request parameters is just not well supported with spring security
-            // TODO: Change API
-            .regexMatchers(HttpMethod.GET, "\\/api\\/fling\\?(shareId=|flingId=)[a-zA-Z0-9]+")
-            .access("@authorizationService.allowFlingAccess(authentication, request)")
+          .antMatchers(HttpMethod.GET, "/api/fling")
+          .hasAuthority(FLING_ADMIN.getAuthority())
+        .and()
+
+
+        /***************************************/
+        /** Authorization for: /api/artifacts **/
+        /***************************************/
+        .authorizeRequests()
+          .antMatchers(HttpMethod.GET, "/api/artifacts/{artifactId}/**")
+          .access("@authorizationService.allowArtifactAccess(#artifactId, authentication)")
         .and()
         .authorizeRequests()
-            // TODO: Security by request parameters is just not well supported with spring security
-            // TODO: Change API
-            .regexMatchers(HttpMethod.GET, "\\/api\\/artifacts\\?(shareId=|flingId=)[a-zA-Z0-9]+")
-            .access("@authorizationService.allowFlingAccess(authentication, request)")
+          .antMatchers(HttpMethod.POST, "/api/artifacts/{artifactId}/data")
+          .access("@authorizationService.allowArtifactUpload(#artifactId, authentication)")
         .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/api/fling/{flingId}/**")
-            .access("@authorizationService.allowFlingAccess(#flingId, authentication)")
-        .and()
-        // And lastly, the owner is allowed everything
-        .authorizeRequests()
-            .antMatchers("/api/**")
-            .hasAuthority(FlingAuthority.FLING_OWNER.name());
+          .antMatchers(HttpMethod.DELETE, "/api/artifacts/{artifactId}")
+          .access("@authorizationService.allowArtifactUpload(#artifactId, authentication)");
 
         //@formatter:on
-  }
-
-  private RequestMatcher modificationMethodsAntMatcher(String antPattern) {
-    return multiMethodAntMatcher(antPattern,
-        HttpMethod.PATCH, HttpMethod.PUT,
-        HttpMethod.POST, HttpMethod.DELETE);
-  }
-
-  private RequestMatcher multiMethodAntMatcher(String antPattern, HttpMethod... httpMethods) {
-    List<RequestMatcher> antMatchers = Arrays.stream(httpMethods)
-        .map(m -> new AntPathRequestMatcher(antPattern, m.toString()))
-        .collect(Collectors.toList());
-
-    return new OrRequestMatcher(antMatchers);
   }
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     // see https://stackoverflow.com/a/43559266
 
-    log.info("Allowed origins: {}", securityConfiguration.getAllowedOrigins());
+    log.info("Allowed origins: {}", allowedOrigins);
 
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(securityConfiguration.getAllowedOrigins());
+    configuration.setAllowedOrigins(allowedOrigins);
     configuration.setAllowedMethods(List.of("*"));
 
     // setAllowCredentials(true) is important, otherwise:

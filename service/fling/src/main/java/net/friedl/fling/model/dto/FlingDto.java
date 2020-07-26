@@ -1,96 +1,55 @@
 package net.friedl.fling.model.dto;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.UUID;
+import javax.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AccessMode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(name = "Fling")
 public class FlingDto {
+  @Schema(accessMode = AccessMode.READ_ONLY, type = "string")
+  private UUID id;
+
+  @Schema(description = "Name of the fling")
+  @NotNull
   private String name;
 
-  private Long id;
-
+  @Schema(type = "integer", format = "int64", accessMode = AccessMode.READ_ONLY,
+      description = "Creation time in milliseconds since the unix epoch 01.01.1970 00:00:00 UTC")
   private Instant creationTime;
 
-  @JsonIgnore
-  private Boolean directDownload;
+  @Schema(description = "Share id of the fling. Used in the share link.")
+  private String shareId;
 
-  @JsonIgnore
-  private Boolean allowUpload;
-
-  @JsonIgnore
-  private Boolean shared;
-
-  @JsonIgnore
-  private String shareUrl;
-
-  @JsonIgnore
-  private Integer expirationClicks;
-
-  @JsonIgnore
-  private Instant expirationTime;
-
+  @Schema(description = "Authentication code for password protecting a fling.")
   private String authCode;
 
-  @JsonProperty("sharing")
-  private void unpackSharing(Map<String, Object> sharing) {
-    this.directDownload = (Boolean) sharing.getOrDefault("directDownload", false);
-    this.allowUpload = (Boolean) sharing.getOrDefault("allowUpload", false);
-    this.shared = (Boolean) sharing.getOrDefault("shared", true);
-    this.shareUrl = (String) sharing.getOrDefault("shareUrl", null);
-  }
+  @Schema(description = "Whether users should be redirected to fling download when accessing the "
+      + "fling by share id")
+  @Builder.Default
+  private Boolean directDownload = false;
 
-  @JsonProperty("sharing")
-  private Map<String, Object> packSharing() {
-    Map<String, Object> sharing = new HashMap<>();
-    sharing.put("directDownload", this.directDownload);
-    sharing.put("allowUpload", this.allowUpload);
-    sharing.put("shared", this.shared);
-    sharing.put("shareUrl", this.shareUrl);
+  @Schema(description = "Allow uploads to the fling by users")
+  @Builder.Default
+  private Boolean allowUpload = false;
 
-    return sharing;
-  }
+  @Schema(description = "Whether the fling is accessible by users via the share id")
+  @Builder.Default
+  private Boolean shared = true;
 
-  @JsonProperty("expiration")
-  private void unpackExpiration(Map<String, Object> expiration) {
-    String type = (String) expiration.getOrDefault("type", null);
-    if (type == null)
-      return;
+  @Schema(description = "How many clicks are left until the fling access by share id is disallowed")
+  private Integer expirationClicks;
 
-    switch (type) {
-      case "time":
-        this.expirationClicks = null;
-        // json can only handle int, long must be given as string
-        // TODO: this back and forth conversion is a bit hack-ish
-        this.expirationTime =
-            Instant.ofEpochMilli(Long.valueOf(expiration.get("value").toString()));
-        break;
-      case "clicks":
-        this.expirationTime = null;
-        this.expirationClicks = Integer.valueOf(expiration.get("value").toString());
-        break;
-      default:
-        throw new IllegalArgumentException("Unexpected value '" + type + "'");
-    }
-  }
-
-  @JsonProperty("expiration")
-  private Map<String, Object> packExpiration() {
-    Map<String, Object> expiration = new HashMap<>();
-
-    if (this.expirationClicks != null) {
-      expiration.put("type", "clicks");
-      expiration.put("value", this.expirationClicks);
-    }
-
-    if (this.expirationTime != null) {
-      expiration.put("type", "time");
-      expiration.put("value", this.expirationTime.toEpochMilli());
-    }
-
-    return expiration;
-  }
+  @Schema(type = "integer", format = "int64",
+      description = "Expiration time in milliseconds since the unix epoch 01.01.1970 00:00:00 UTC")
+  private Instant expirationTime;
 }

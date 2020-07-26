@@ -1,46 +1,48 @@
 package net.friedl.fling.persistence.entities;
 
+import java.nio.file.Path;
 import java.time.Instant;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Artifact")
+@Table(name = "Artifact", uniqueConstraints = @UniqueConstraint(columnNames = {"fling_id", "path"}))
 @Getter
 @Setter
 public class ArtifactEntity {
   @Id
   @GeneratedValue
-  private Long id;
+  private UUID id;
 
-  private String name;
+  @Column(nullable = false)
+  private Path path;
 
-  private Integer version;
+  @Column(unique = true, nullable = true)
+  private String archiveId;
 
-  private String path;
-
-  @Column(unique = true)
-  private String doi;
-
-  private Instant uploadTime;
-
-  private Long size;
+  @Column(nullable = false)
+  private Boolean archived = false;
 
   @ManyToOne(optional = false)
   private FlingEntity fling;
 
-  @PrePersist
-  private void prePersist() {
-    this.uploadTime = Instant.now();
+  @CreationTimestamp
+  private Instant creationTime;
 
-    if (this.version == null)
-      this.version = -1;
-  }
+  @UpdateTimestamp
+  private Instant updateTime;
+
+  @Version
+  private Long version;
 }

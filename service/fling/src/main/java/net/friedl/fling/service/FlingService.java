@@ -1,36 +1,26 @@
 package net.friedl.fling.service;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.Set;
+import java.util.UUID;
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.friedl.fling.model.dto.ArtifactDto;
 import net.friedl.fling.model.dto.FlingDto;
+import net.friedl.fling.model.mapper.ArtifactMapper;
 import net.friedl.fling.model.mapper.FlingMapper;
-import net.friedl.fling.persistence.archive.Archive;
-import net.friedl.fling.persistence.archive.ArchiveException;
-import net.friedl.fling.persistence.entities.ArtifactEntity;
 import net.friedl.fling.persistence.entities.FlingEntity;
 import net.friedl.fling.persistence.repositories.FlingRepository;
+import net.friedl.fling.service.archive.ArchiveService;
 
 @Slf4j
 @Service
@@ -39,135 +29,115 @@ public class FlingService {
 
   private FlingRepository flingRepository;
   private FlingMapper flingMapper;
-  private Archive archive;
-  private MessageDigest keyHashDigest;
+  private ArtifactMapper artifactMapper;
+  private ArchiveService archiveService;
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
-  public FlingService(FlingRepository flingRepository, FlingMapper flingMapper, Archive archive,
-      MessageDigest keyHashDigest) {
+  public FlingService(FlingRepository flingRepository, FlingMapper flingMapper,
+      ArtifactMapper artifactMapper,
+      ArchiveService archiveService, PasswordEncoder passwordEcoder) {
+
     this.flingRepository = flingRepository;
     this.flingMapper = flingMapper;
-    this.archive = archive;
-    this.keyHashDigest = keyHashDigest;
+    this.artifactMapper = artifactMapper;
+    this.archiveService = archiveService;
+    this.passwordEncoder = passwordEcoder;
   }
 
+  /**
+   * Retrieves a list of all flings
+   * 
+   * @return A list of all flings
+   */
   public List<FlingDto> findAll() {
-    return flingMapper.map(flingRepository.findAll());
+    return flingMapper.mapEntities(flingRepository.findAll());
   }
 
-  public Long createFling(FlingDto flingDto) {
-    if (!StringUtils.hasText(flingDto.getShareUrl())) {
-      flingDto.setShareUrl(generateShareUrl());
+  /**
+   * Get a fling by id
+   * 
+   * @param id Id of the fling. Must exist.
+   * @return The fling
+   */
+  public FlingDto getById(UUID id) {
+    return flingMapper.map(flingRepository.getOne(id));
+  }
+
+  /**
+   * Creates a new fling entity from {@code flingDto}
+   * 
+   * @param flingDto Base data from which the new fling should be created
+   * @return The created fling
+   */
+  public FlingDto create(FlingDto flingDto) {
+    log.debug("Creating new fling");
+    FlingEntity flingEntity = flingMapper.map(flingDto);
+
+    if (!StringUtils.hasText(flingEntity.getShareId())) {
+      log.debug("No share id set. Generating random share id");
+      flingEntity.setShareId(generateShareId());
     }
 
-    var flingEntity = flingMapper.map(flingDto);
-    flingEntity.setAuthCode(hashKey(flingEntity.getAuthCode()));
+    if (StringUtils.hasText(flingEntity.getAuthCode())) {
+      log.debug("Hashing authentication code for {}", flingEntity.getId());
+      flingEntity.setAuthCode(hashAuthCode(flingDto.getAuthCode()));
+    }
+
     flingEntity = flingRepository.save(flingEntity);
-    return flingEntity.getId();
+    log.debug("Created new fling {}", flingEntity.getId());
+    return flingMapper.map(flingEntity);
   }
 
-  public Boolean existsShareUrl(String shareUrl) {
-    return !flingRepository.findByShareUrl(shareUrl).isEmpty();
+  public FlingDto getByShareId(String shareId) {
+    FlingEntity flingEntity = flingRepository.findByShareId(shareId);
+    if (flingEntity == null) {
+      throw new EntityNotFoundException("No entity for shareId=" + shareId);
+    }
+    return flingMapper.map(flingEntity);
   }
 
-  public void mergeFling(Long flingId, FlingDto flingDto) {
-    var flingEntity = flingRepository.getOne(flingId);
-
-    mergeNonEmpty(flingDto::getAllowUpload, flingEntity::setAllowUpload);
-    mergeNonEmpty(flingDto::getDirectDownload, flingEntity::setDirectDownload);
-    mergeWithEmpty(flingDto::getExpirationClicks, flingEntity::setExpirationClicks);
-    mergeWithEmpty(flingDto::getExpirationTime, flingEntity::setExpirationTime);
-    mergeNonEmpty(flingDto::getName, flingEntity::setName);
-    mergeNonEmpty(flingDto::getShared, flingEntity::setShared);
-    mergeNonEmpty(flingDto::getShareUrl, flingEntity::setShareUrl);
-    mergeWithEmpty(() -> hashKey(flingDto.getAuthCode()), flingEntity::setAuthCode);
+  public void delete(UUID id) throws IOException {
+    archiveService.deleteFling(id);
+    flingRepository.deleteById(id);
+    log.debug("Deleted fling {}", id);
   }
 
-  public Optional<FlingDto> findFlingById(Long flingId) {
-    return flingMapper.map(flingRepository.findById(flingId));
+  public Set<ArtifactDto> getArtifacts(UUID id) {
+    FlingEntity flingEntity = flingRepository.getOne(id);
+    Set<ArtifactDto> artifactDto = artifactMapper.mapEntities(flingEntity.getArtifacts());
+    return artifactDto == null ? Set.of() : artifactDto;
   }
 
-  public Optional<FlingDto> findFlingByShareId(String shareUrl) {
-    return flingMapper.map(flingRepository.findByShareUrl(shareUrl));
-  }
-
-  public void deleteFlingById(Long flingId) {
-    flingRepository.deleteById(flingId);
-  }
-
-  public boolean hasAuthCode(Long flingId, String authCode) {
-    var fling = flingRepository.getOne(flingId);
-
-    if (!StringUtils.hasText(fling.getAuthCode()))
-      return true;
-
-    return fling.getAuthCode().equals(hashKey(authCode));
-  }
-
-  public String getShareName(String shareUrl) {
-
-    FlingEntity flingEntity = flingRepository.findByShareUrl(shareUrl).orElseThrow();
-
-    if (flingEntity.getArtifacts().size() > 1)
-      return flingEntity.getName();
-    else if (flingEntity.getArtifacts().size() == 1)
-      return flingEntity.getArtifacts().stream().findFirst().get().getName();
-
-    return null;
-  }
-
-  public Long countArtifacts(Long flingId) {
-    return flingRepository.countArtifactsById(flingId);
-  }
-
-  public Long getFlingSize(Long flingId) {
-    var fling = flingRepository.getOne(flingId);
-
-    return fling.getArtifacts().stream()
-        .map(ae -> ae.getSize())
-        .reduce(0L, (acc, as) -> acc + as);
-  }
-
-  public String packageFling(Long flingId) throws IOException, ArchiveException {
-    var fling = flingRepository.getOne(flingId);
-    var tempFile = Files.createTempFile(Long.toString(flingId), ".zip");
-
-    try (var zipStream = new ZipOutputStream(new FileOutputStream(tempFile.toFile()))) {
-      zipStream.setLevel(Deflater.BEST_SPEED);
-      for (ArtifactEntity artifactEntity : fling.getArtifacts()) {
-        ZipEntry ze = new ZipEntry(artifactEntity.getName());
-        zipStream.putNextEntry(ze);
-
-        var artifactStream = archive.get(artifactEntity.getDoi());
-        try (var archiveEntryStream = new BufferedInputStream(artifactStream)) {
-          int b;
-          while ((b = archiveEntryStream.read()) != -1) {
-            zipStream.write(b);
-          }
-        } finally {
-          zipStream.closeEntry();
-        }
-      }
+  public boolean validateAuthCode(UUID id, String authCode) {
+    FlingEntity flingEntity = flingRepository.getOne(id);
+    if (StringUtils.hasText(flingEntity.getAuthCode()) != StringUtils.hasText(authCode)) {
+      return false; // only one of them is empty; implicit null safety check
     }
 
-    return tempFile.getFileName().toString();
+    boolean valid = flingEntity.getAuthCode().equals(hashAuthCode(authCode));
+    log.debug("Provided authentication for {} is {} valid", id, valid ? "" : "not");
+    return valid;
   }
 
-  public Pair<InputStream, Long> downloadFling(String fileId) throws IOException, ArchiveException {
-    var tempFile = Paths.get(System.getProperty("java.io.tmpdir"), fileId).toFile();
-
-    var archiveLength = tempFile.length();
-    var archiveStream = new FileInputStream(tempFile);
-
-    return Pair.of(archiveStream, archiveLength);
+  private String hashAuthCode(String authCode) {
+    if (!StringUtils.hasText(authCode)) return null;
+    String hash = passwordEncoder.encode(authCode);
+    log.debug("Hashed authentication code to {}", hash);
+    return hash;
   }
 
-  public String generateShareUrl() {
-    var key = KeyGenerators
+  /**
+   * Generates a URL safe share id
+   * 
+   * @return A random URL safe share id
+   */
+  private String generateShareId() {
+    byte[] key = KeyGenerators
         .secureRandom(16)
         .generateKey();
 
-    return Base64.getUrlEncoder().encodeToString(key)
+    String shareId = Base64.getUrlEncoder().encodeToString(key)
         // replace all special chars [=-_] in RFC 4648
         // "URL and Filename safe" table with characters from
         // [A-Za-z0-9]. Hence, the generated share url will only consist
@@ -175,23 +145,24 @@ public class FlingService {
         .replace('=', 'q')
         .replace('_', 'u')
         .replace('-', 'd');
+
+    log.debug("Generated share id {}", shareId);
+    return shareId;
   }
 
-  public String hashKey(String key) {
-    if (!StringUtils.hasText(key))
-      return null;
-
-    return new String(Hex.encode(keyHashDigest.digest(key.getBytes())));
-  }
-
-  private <T> void mergeNonEmpty(Supplier<T> sup, Consumer<T> con) {
-    T r = sup.get();
-    if (r != null)
-      con.accept(r);
-  }
-
-  private <T> void mergeWithEmpty(Supplier<T> sup, Consumer<T> con) {
-    T r = sup.get();
-    con.accept(r);
+  public FlingDto replace(UUID id, @Valid FlingDto flingDto) {
+    FlingEntity flingEntity = flingRepository.getOne(id);
+    flingEntity.setId(id);
+    flingEntity.setAllowUpload(flingDto.getAllowUpload());
+    flingEntity.setDirectDownload(flingDto.getDirectDownload());
+    flingEntity.setShared(flingDto.getShared());
+    flingEntity.setExpirationClicks(flingDto.getExpirationClicks());
+    flingEntity.setExpirationTime(flingDto.getExpirationTime());
+    flingEntity.setName(flingDto.getName());
+    flingEntity.setShareId(flingDto.getShareId());
+    if (!flingDto.getAuthCode().equals(flingEntity.getAuthCode())) {
+      flingEntity.setAuthCode(hashAuthCode(flingDto.getAuthCode()));
+    }
+    return flingMapper.map(flingEntity);
   }
 }

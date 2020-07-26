@@ -1,26 +1,36 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
-import {useParams} from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
-import {flingClient} from '../../util/flingclient';
+import { FlingClient } from '../../util/fc';
 
 import DirectDownload from './DirectDownload';
 import FlingUserList from './FlingUserList';
 
 export default function FlingUser() {
-    let { shareId } = useParams();
-    let [fling, setFling] = useState({});
+  let { shareId } = useParams();
+  let [fling, setFling] = useState({});
+  let [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        flingClient.getFlingByShareId(shareId)
-            .then(f => setFling(f));
-    }, [shareId]);
+  useEffect(() => {
+    let flingClient = new FlingClient();
+    flingClient.getFlingByShareId(shareId)
+      .then(f => {
+        setFling(f);
+        setLoading(false);
+      });
+  }, [shareId]);
 
-    return(
-        <div>
-          {fling.sharing && fling.sharing.directDownload
-           ? <DirectDownload fling={fling} />
-           : <FlingUserList fling={fling} />}
-        </div>
-    );
+  return (
+    <>
+    {loading
+     ? <div></div>
+     : <div>
+        {fling.shared && fling.directDownload
+          ? <DirectDownload fling={fling} />
+          : <FlingUserList fling={fling} />}
+       </div>
+    }
+    </>
+  );
 }

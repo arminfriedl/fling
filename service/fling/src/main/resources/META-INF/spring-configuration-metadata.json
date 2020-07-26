@@ -1,0 +1,75 @@
+ {
+	"groups": [
+		{
+			"name": "fling.archive.filesystem",
+			"type": "net.friedl.fling.service.archive.impl.FileSystemArchive",
+			"sourceType": "net.friedl.fling.service.archive.impl.FileSystemArchive"
+		},
+		{
+			"name": "fling.security",
+			"type": "net.friedl.fling.security.FlingWebSecurityConfiguration",
+			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		},
+		{
+			"name": "fling.api",
+			"type": "net.friedl.fling.controller.OpenApiConfiguration",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
+		}
+	],
+	"properties": [
+		{
+			"name": "fling.api.version",
+			"type": "java.lang.String",
+			"description": "Fling API version",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
+		},
+		{
+			"name": "fling.api.server-url",
+			"type": "java.lang.String",
+			"description": "Base URL for the fling api",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
+		},
+		{
+			"name": "fling.api.server-description",
+			"type": "java.lang.String",
+			"description": "A description for the server to be shown in OAS",
+			"sourceType": "net.friedl.fling.controller.OpenApiConfiguration"
+		},
+		{
+			"name": "fling.archive.filesystem.archive-path",
+			"type": "java.lang.String",
+			"description": "Directory where FileSystemArchive stores its data",
+			"sourceType": "net.friedl.fling.service.archive.impl.FileSystemArchive"
+		},
+		{
+			"name": "fling.security.allowed-origins",
+			"type": "java.util.List",
+			"description": "Allowed origins for CORS",
+			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		},
+		{
+			"name": "fling.security.admin-name",
+			"type": "java.lang.String",
+			"description": "Username of the admin user/instance owner",
+			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		},
+		{
+			"name": "fling.security.admin-password",
+			"type": "java.util.String",
+			"description": "Password of the admin user/instance owner",
+			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		},
+		{
+			"name": "fling.security.signing-key",
+			"type": "java.util.String",
+			"description": "Key for signing JWT tokens. Must be 256 bits (32 bytes)",
+			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		},
+		{
+			"name": "fling.security.jwt-expiration",
+			"type": "java.util.Long",
+			"description": "Time until JWT tokens expire",
+			"sourceType": "net.friedl.fling.security.FlingWebSecurityConfiguration"
+		}
+	]
+} 
