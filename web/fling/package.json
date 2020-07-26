@@ -22,7 +22,8 @@
     "react-scripts": "3.4.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "spectre.css": "^0.5.8"
+    "spectre.css": "^0.5.8",
+    "vanillatoasts": "^1.4.0"
   },
   "scripts": {
     "start": "react-scripts start",

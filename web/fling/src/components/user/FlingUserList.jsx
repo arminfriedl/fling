@@ -1,4 +1,5 @@
 import log from 'loglevel';
+import VanillaToasts from 'vanillatoasts';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { Switch, Route, useLocation, Link } from "react-router-dom";
@@ -17,7 +18,10 @@ function Artifacts(props) {
 
     let flingClient = new FlingClient();
     flingClient.getArtifacts(props.fling.id)
-      .then(artifacts => setArtifacts(artifacts));
+      .then(artifacts => {
+        artifacts = artifacts.filter(a => a.archived)
+        setArtifacts(artifacts)
+      });
   }, [props.fling]);
 
   function renderArtifact(artifact) {
@@ -119,9 +123,21 @@ function Upload(props) {
     stopEvent(ev);
     ev.persist();
 
-    let evFiles = ev.dataTransfer.files;
+    let maxSize = process.env.REACT_APP_FILESIZE;
+    let evFiles = fileListToArray(ev.dataTransfer.files);
 
-    if (!evFiles) {
+    for (let i = evFiles.length - 1; i >= 0; i--) {
+      if (maxSize && maxSize >= 0 && evFiles[i].size > maxSize) {
+        VanillaToasts.create({
+          title: "Maximum file size exceeded",
+          text: `${evFiles[i].name} exceeds the maximum file size of ${prettifyBytes(maxSize)}`,
+          type: "warning"
+        });
+        evFiles.splice(i, 1);
+      };
+    }
+
+    if (evFiles.length === 0) {
       console.warn("Dropzone triggered without files");
       return;
     }
@@ -236,6 +252,7 @@ function Upload(props) {
             </div>
             <div className="upload-command-line m-2">
               <span className="total-upload">Total Size: {totalSize()}</span>
+              <span className="total-upload">{`Max: ${prettifyBytes(process.env.REACT_APP_FILESIZE)}`}</span>
               <button className="btn btn-primary btn-upload" onClick={handleUpload}>Upload</button>
             </div>
           </div>
@@ -303,10 +320,10 @@ export default function FlingUserList(props) {
               <li className={`tab-item ${location.pathname !== path("upload") ? "active" : ""}`}>
                 <Link to={path("files")}>Files</Link>
               </li>
-              { props.fling.allowUpload
+              {props.fling.allowUpload
                 ? <li className={`tab-item ${location.pathname === path("upload") ? "active" : ""}`}>
-                    <Link to={path("upload")}>Upload</Link>
-                  </li>
+                  <Link to={path("upload")}>Upload</Link>
+                </li>
                 : <></>
               }
 

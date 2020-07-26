@@ -14,6 +14,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from './App';
 
+import 'vanillatoasts/vanillatoasts.css';
 import "./style/fling.scss";
 
 import * as serviceWorker from './serviceWorker';
