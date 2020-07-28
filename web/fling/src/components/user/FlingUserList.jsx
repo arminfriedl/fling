@@ -123,7 +123,7 @@ function Upload(props) {
     stopEvent(ev);
     ev.persist();
 
-    let maxSize = process.env.REACT_APP_FILESIZE;
+    let maxSize = window['flingconfig'].FILESIZE;
     let evFiles = fileListToArray(ev.dataTransfer.files);
 
     for (let i = evFiles.length - 1; i >= 0; i--) {
@@ -252,7 +252,7 @@ function Upload(props) {
             </div>
             <div className="upload-command-line m-2">
               <span className="total-upload">Total Size: {totalSize()}</span>
-              <span className="total-upload">{`Max: ${prettifyBytes(process.env.REACT_APP_FILESIZE)}`}</span>
+              <span className="total-upload">{`Max: ${prettifyBytes(window['flingconfig'].FILESIZE)}`}</span>
               <button className="btn btn-primary btn-upload" onClick={handleUpload}>Upload</button>
             </div>
           </div>
@@ -290,7 +290,7 @@ export default function FlingUserList(props) {
         // the browser downloads the file fine, it also reloads the page, hence
         // loosing all logs and state
         let frame = document.createElement("iframe");
-        let url = `${process.env.REACT_APP_API.replace(/\/+$/, '')}/api/fling/${props.fling.id}/data?derivedToken=${token}`;
+        let url = `${window['flingconfig'].API_BASE.replace(/\/+$/, '')}/api/fling/${props.fling.id}/data?derivedToken=${token}`;
         log.trace(`Generated download url: ${url}`);
         frame.src = url;
         setInProgress(false);
