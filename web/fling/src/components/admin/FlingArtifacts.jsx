@@ -22,7 +22,7 @@ function FlingArtifactControl(props) {
         // the browser downloads the file fine, it also reloads the page, hence
         // loosing all logs and state
         let frame = document.createElement("iframe");
-        let url = `${process.env.REACT_APP_API.replace(/\/+$/, '')}/api/artifacts/${props.artifact.id}/data?derivedToken=${token}`;
+        let url = `${window['flingconfig'].API_BASE.replace(/\/+$/, '')}/api/artifacts/${props.artifact.id}/data?derivedToken=${token}`;
         log.trace(`Generated download url: ${url}`);
         frame.src = url;
         iframeContainer.current.appendChild(frame);

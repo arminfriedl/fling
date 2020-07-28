@@ -9,7 +9,7 @@ import * as fc from '@fling/flingclient';
  */
 let clientConfig = (token) => {
   let config = new fc.ApiClient();
-  config.basePath = process.env.REACT_APP_API.replace(/\/+$/, '');
+  config.basePath = window['flingconfig'].API_BASE.replace(/\/+$/, '');
 
   token = token || sessionStorage.getItem('token');
   if (token) { config.authentications['bearer'].accessToken = token; }

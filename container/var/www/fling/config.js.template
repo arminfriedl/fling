@@ -1,0 +1,5 @@
+window['flingconfig'] = {
+    API_BASE: "${FLING_API_BASE}",
+    LOG_LEVEL: "${FLING_LOG_LEVEL}",
+    FILESIZE: "${FLING_FILESIZE}"
+}
