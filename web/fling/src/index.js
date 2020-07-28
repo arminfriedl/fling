@@ -21,8 +21,8 @@ import * as serviceWorker from './serviceWorker';
 
 /* Logging Setup */
 log.setDefaultLevel(log.levels.TRACE);
-if (process.env.REACT_APP_LOGLEVEL) {
-  log.setLevel(process.env.REACT_APP_LOGLEVEL);
+if (window['flingconfig'].LOG_LEVEL) {
+  log.setLevel(window['flingconfig'].LOG_LEVEL);
 }
 
 /* Store setup */

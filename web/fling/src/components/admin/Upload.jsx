@@ -82,7 +82,7 @@ export default function Upload() {
     stopEvent(ev);
     ev.persist();
 
-    let maxSize = process.env.REACT_APP_FILESIZE;
+    let maxSize = window['flingconfig'].FILESIZE;
     let evFiles = fileListToArray(ev.dataTransfer.files);
 
     for (let i = evFiles.length - 1; i >= 0; i--) {
@@ -211,7 +211,7 @@ export default function Upload() {
             </div>
             <div className="upload-command-line m-2">
               <span className="total-upload">Total Size: {totalSize()}</span>
-              <span className="total-upload">{`Max: ${prettifyBytes(process.env.REACT_APP_FILESIZE)}`}</span>
+              <span className="total-upload">{`Max: ${prettifyBytes(window['flingconfig'].FILESIZE)}`}</span>
               <button className="btn btn-primary btn-upload" onClick={handleUpload}>Upload</button>
             </div>
           </div>

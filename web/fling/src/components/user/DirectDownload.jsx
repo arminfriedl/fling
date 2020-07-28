@@ -16,7 +16,7 @@ export default function FlingUser(props) {
     let authClient = new AuthClient();
     authClient.deriveToken({ singleUse: true })
       .then(token => {
-        let url = `${process.env.REACT_APP_API.replace(/\/+$/, '')}/api/fling/${props.fling.id}/data?derivedToken=${token}`;
+        let url = `${window['flingconfig'].API_BASE.replace(/\/+$/, '')}/api/fling/${props.fling.id}/data?derivedToken=${token}`;
         log.trace(`Generated download url for link: ${url}`);
         setDownloadUrl(url);
       })
@@ -28,7 +28,7 @@ export default function FlingUser(props) {
             // the browser downloads the file fine, it also reloads the page, hence
             // loosing all logs and state
             let frame = document.createElement("iframe");
-            let url = `${process.env.REACT_APP_API.replace(/\/+$/, '')}/api/fling/${props.fling.id}/data?derivedToken=${token}`;
+            let url = `${window['flingconfig'].API_BASE.replace(/\/+$/, '')}/api/fling/${props.fling.id}/data?derivedToken=${token}`;
             log.trace(`Generated download url: ${url}`);
             frame.src = url;
             iframeContainer.current.appendChild(frame);
