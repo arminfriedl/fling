@@ -1,4 +1,18 @@
-[![Build Status](https://drone.friedl.net/api/badges/incubator/fling/status.svg)](https://drone.friedl.net/incubator/fling)
+**12.01.2021: Fling has moved to the attic**
+
+Fling was a good learning experiment for a non-trivial React app with a REST
+backend. However, it never really got any traction and I'm not using it anymore.
+Other projects are more important to me and maintaining Fling does not make any
+sense. As of now docker containers are deleted and the artifacts are not
+distributed anymore. You are free to fork and build your own version but no more
+work will be done in this repository.
+
+Alternatives:
+- If you are looking for mature self-hosted file sharing solution,
+  [ownCloud](https://owncloud.com/) is in many ways similar to Fling and then
+  some.
+- If you want an even simpler solution for sharing files over http,
+  [dirl](https://github.com/arminfriedl/dirl) might meet your needs.
 
 # Fling
 Fling is a self-hosted file share. It is simple like USB without missing out on
@@ -28,9 +42,9 @@ https://fling.friedl.net/swagger-ui.html and
 https://fling.friedl.net/v3/api-docs.
 
 # Starting Fling from Docker
-A Fling container is provided at https://hub.docker.com/repository/docker/arminfriedl/fling. 
+A Fling container is provided at https://hub.docker.com/repository/docker/arminfriedl/fling.
 
-1. Run `docker run --rm -p3000:3000 arminfriedl/fling` 
+1. Run `docker run --rm -p3000:3000 arminfriedl/fling`
 2. Go to the default http://localhost:3000
 3. Log in with `adminName:adminPassword`.
 
